@@ -652,7 +652,6 @@ function saveToFirebase(){
   }).then(()=>console.log('✅ Sauvegardé'))
   .catch(e=>console.error('❌',e));
 }
-
 function loadFromFirebase(){
   if(!window.db)return;
   window.db.ref('echo112/state').once('value',(snap)=>{
@@ -665,6 +664,7 @@ function loadFromFirebase(){
     renderEchos();
   });
 }
+
 
 
 window.addEventListener('load',()=>{
