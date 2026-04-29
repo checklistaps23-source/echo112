@@ -5,26 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ECHO 112 — Poste de Secours</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-  const firebaseConfig = {
-    apiKey: "AIzaSyBXw5aieOHSv9aQsjjtEnUa0DYvcvozv34",
-    authDomain: "echo112.firebaseapp.com",
-    databaseURL: "https://echo112-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "echo112",
-    storageBucket: "echo112.firebasestorage.app",
-    messagingSenderId: "552122882151",
-    appId: "1:552122882151:web:aa7b9c194e7bce85749cc2"
-  };
-  const app = initializeApp(firebaseConfig);
-  window.db = getDatabase(app);
-  window.fbRef = ref;
-  window.fbSet = set;
-  window.fbOnValue = onValue;
-  console.log("Firebase connecté ✅");
-</script>
-
 <style>
 :root{--bg:#07090d;--panel:#0d1117;--panel2:#111820;--border:#1a2d3f;--accent:#00d4ff;--green:#00ff88;--red:#ff2244;--yellow:#ffcc00;--orange:#ff8800;--text:#c8dae8;--text-dim:#4a6a80;--font-h:'Rajdhani',sans-serif;--font-m:'Share Tech Mono',monospace;--font-b:'Exo 2',sans-serif;}
 *{margin:0;padding:0;box-sizing:border-box;}
