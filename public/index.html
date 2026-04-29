@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECHO 112 — Poste de Secours</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090d;--panel:#0d1117;--panel2:#111820;--border:#1a2d3f;--accent:#00d4ff;--green:#00ff88;--red:#ff2244;--yellow:#ffcc00;--orange:#ff8800;--text:#c8dae8;--text-dim:#4a6a80;--font-h:'Rajdhani',sans-serif;--font-m:'Share Tech Mono',monospace;--font-b:'Exo 2',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+header{background:var(--panel);border-bottom:2px solid var(--border);height:52px;display:flex;align-items:center;padding:0 14px;gap:12px;flex-shrink:0;z-index:100;}
+.logo{font-family:var(--font-h);font-size:22px;font-weight:700;letter-spacing:4px;color:var(--accent);text-shadow:0 0 20px rgba(0,212,255,0.5);white-space:nowrap;}
+.logo span{color:var(--red);}
+.event-badge{font-family:var(--font-m);font-size:10px;color:var(--text-dim);border-left:1px solid var(--border);padding-left:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.clock{font-family:var(--font-m);font-size:15px;color:var(--accent);}
+.hbtn{background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:var(--font-h);font-size:11px;font-weight:600;letter-spacing:1px;padding:4px 10px;cursor:pointer;text-transform:uppercase;transition:all .15s;white-space:nowrap;}
+.hbtn:hover,.hbtn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,0.06);}
+.hbtn.red{color:var(--red);}
+.hbtn.red:hover{border-color:var(--red);background:rgba(255,34,68,0.08);}
+.doc-bar{background:var(--panel2);border-bottom:1px solid var(--border);padding:5px 14px;display:flex;gap:20px;align-items:center;flex-shrink:0;flex-wrap:wrap;}
+.doc-item{display:flex;align-items:center;gap:6px;font-family:var(--font-m);font-size:10px;}
+.doc-label{color:var(--text-dim);}
+.doc-val{color:var(--text);}
+.doc-val.green{color:var(--green);}
+.doc-val.red{color:var(--red);}
+.doc-val.yellow{color:var(--yellow);}
+.main{display:flex;flex:1;overflow:hidden;}
+.nav-tabs{width:52px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px;flex-shrink:0;}
+.nav-tab{width:40px;height:40px;background:transparent;border:1px solid transparent;color:var(--text-dim);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px;transition:all .15s;border-radius:4px;position:relative;}
+.nav-tab:hover{border-color:var(--border);color:var(--text);}
+.nav-tab.active{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,0.06);}
+.nav-tab .badge{position:absolute;top:2px;right:2px;background:var(--red);color:#fff;font-family:var(--font-m);font-size:8px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.content{flex:1;overflow:hidden;display:flex;}
+.view-panel{display:none;flex:1;overflow-y:auto;flex-direction:column;}
+.view-panel.active{display:flex;}
+.echos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;padding:14px;}
+.echo-card{background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--border);padding:14px;transition:all .15s;}
+.echo-card.s-dispo{border-left-color:var(--green);}
+.echo-card.s-inter{border-left-color:var(--red);animation:pulse-border .8s infinite;}
+.echo-card.s-pause{border-left-color:var(--yellow);}
+@keyframes pulse-border{0%,100%{box-shadow:0 0 0 0 rgba(255,34,68,0)}50%{box-shadow:0 0 10px 2px rgba(255,34,68,0.3)}}
+.ec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.ec-name{font-family:var(--font-h);font-size:20px;font-weight:700;letter-spacing:2px;color:#fff;}
+.ec-canal{font-family:var(--font-m);font-size:9px;color:var(--text-dim);}
+.ec-status{display:flex;align-items:center;gap:5px;font-family:var(--font-m);font-size:10px;letter-spacing:1px;margin-bottom:8px;}
+.sdot{width:7px;height:7px;border-radius:50%;}
+.s-dispo .sdot{background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s infinite;}
+.s-dispo .ec-status{color:var(--green);}
+.s-inter .sdot{background:var(--red);box-shadow:0 0 8px var(--red);animation:blink .6s infinite;}
+.s-inter .ec-status{color:var(--red);}
+.s-pause .sdot{background:var(--yellow);box-shadow:0 0 6px var(--yellow);}
+.s-pause .ec-status{color:var(--yellow);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.ec-members{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;min-height:22px;}
+.mtag{background:rgba(26,45,63,0.8);border:1px solid var(--border);font-size:9px;padding:2px 7px;display:flex;align-items:center;gap:4px;}
+.fn-badge{font-size:8px;padding:1px 4px;font-family:var(--font-m);}
+.fn-AMB{background:rgba(0,212,255,0.15);color:var(--accent);}
+.fn-SEC{background:rgba(0,255,136,0.12);color:var(--green);}
+.fn-INF{background:rgba(255,204,0,0.12);color:var(--yellow);}
+.fn-SIS{background:rgba(255,136,0,0.15);color:var(--orange);}
+.fn-MED{background:rgba(255,34,68,0.15);color:var(--red);}
+.ec-timer{font-family:var(--font-m);font-size:11px;color:var(--red);margin-bottom:8px;display:none;}
+.s-inter .ec-timer{display:block;}
+.ec-btns{display:flex;gap:4px;margin-bottom:6px;}
+.sbtn{flex:1;background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:var(--font-m);font-size:9px;padding:5px 0;cursor:pointer;transition:all .15s;text-transform:uppercase;}
+.sbtn-dispo:hover,.sbtn-dispo.on{border-color:var(--green);color:var(--green);background:rgba(0,255,136,0.07);}
+.sbtn-inter:hover,.sbtn-inter.on{border-color:var(--red);color:var(--red);background:rgba(255,34,68,0.1);}
+.sbtn-pause:hover,.sbtn-pause.on{border-color:var(--yellow);color:var(--yellow);background:rgba(255,204,0,0.07);}
+.btn-inter-detail{width:100%;background:rgba(255,34,68,0.1);border:1px solid var(--red);color:var(--red);font-family:var(--font-h);font-size:11px;letter-spacing:1px;padding:5px;cursor:pointer;text-transform:uppercase;transition:all .15s;display:none;}
+.s-inter .btn-inter-detail{display:block;}
+.btn-inter-detail:hover{background:rgba(255,34,68,0.2);}
+.grid-view{padding:14px;flex:1;display:flex;flex-direction:column;gap:12px;}
+.grid-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.grid-wrap{flex:1;overflow:auto;border:1px solid var(--border);background:var(--panel);}
+.grid-table{border-collapse:collapse;}
+.grid-table th,.grid-table td{border:1px solid rgba(26,45,63,0.6);}
+.grid-table th{background:var(--panel2);font-family:var(--font-m);font-size:11px;color:var(--accent);padding:6px 10px;text-align:center;min-width:60px;}
+.grid-table td{width:80px;height:60px;text-align:center;vertical-align:middle;position:relative;cursor:pointer;transition:background .1s;}
+.grid-table td:hover{background:rgba(0,212,255,0.05);}
+.grid-table td.poste{background:rgba(0,255,136,0.08);border:2px solid var(--green)!important;}
+.cell-label{font-family:var(--font-m);font-size:8px;color:rgba(74,106,128,0.5);position:absolute;top:2px;left:3px;}
+.cell-echos{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;align-items:center;padding:4px;}
+.cell-echo-badge{font-family:var(--font-h);font-size:11px;font-weight:700;padding:1px 5px;border-radius:2px;}
+.cell-echo-badge.s-dispo{background:rgba(0,255,136,0.2);color:var(--green);border:1px solid var(--green);}
+.cell-echo-badge.s-inter{background:rgba(255,34,68,0.2);color:var(--red);border:1px solid var(--red);}
+.cell-echo-badge.s-pause{background:rgba(255,204,0,0.2);color:var(--yellow);border:1px solid var(--yellow);}
+.poste-icon{font-size:16px;}
+.inter-view{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.inter-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;}
+.stat-card{background:var(--panel);border:1px solid var(--border);padding:10px 12px;}
+.stat-label{font-family:var(--font-m);font-size:8px;color:var(--text-dim);letter-spacing:2px;margin-bottom:4px;}
+.stat-val{font-family:var(--font-h);font-size:26px;font-weight:700;line-height:1;}
+.stat-val.g{color:var(--green);}
+.stat-val.r{color:var(--red);}
+.stat-val.y{color:var(--yellow);}
+.stat-val.b{color:var(--accent);}
+.inter-list{display:flex;flex-direction:column;gap:8px;}
+.inter-item{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);padding:10px 12px;}
+.inter-item.evac{border-left-color:var(--red);}
+.inter-item.poste{border-left-color:var(--green);}
+.inter-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.inter-echo{font-family:var(--font-h);font-size:14px;font-weight:700;letter-spacing:2px;}
+.inter-time{font-family:var(--font-m);font-size:9px;color:var(--text-dim);}
+.inter-info{font-size:11px;color:var(--text-dim);}
+.inter-badge{font-family:var(--font-m);font-size:9px;padding:2px 7px;border-radius:2px;}
+.inter-badge.evac{background:rgba(255,34,68,0.15);color:var(--red);border:1px solid var(--red);}
+.inter-badge.poste{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid var(--green);}
+.mc-view{padding:14px;display:flex;flex-direction:column;gap:10px;}
+.mc-list{display:flex;flex-direction:column;gap:4px;flex:1;}
+.mc-item{display:flex;gap:10px;align-items:flex-start;padding:6px 10px;border-left:2px solid var(--border);}
+.mc-item.type-inter{border-left-color:var(--red);}
+.mc-item.type-dispo{border-left-color:var(--green);}
+.mc-item.type-pause{border-left-color:var(--yellow);}
+.mc-item.type-evac{border-left-color:var(--orange);}
+.mc-item.type-config{border-left-color:var(--accent);}
+.mc-time{font-family:var(--font-m);font-size:10px;color:var(--text-dim);white-space:nowrap;flex-shrink:0;}
+.mc-text{font-size:11px;color:var(--text);}
+.res-view{padding:14px;display:flex;flex-direction:column;gap:14px;}
+.res-section{background:var(--panel);border:1px solid var(--border);}
+.res-head{background:var(--panel2);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.res-title{font-family:var(--font-h);font-size:12px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;}
+.res-body{padding:12px 14px;}
+.medecin-card{display:flex;align-items:center;gap:14px;}
+.medecin-avatar{width:44px;height:44px;background:rgba(255,34,68,0.15);border:1px solid var(--red);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.medecin-info{flex:1;}
+.medecin-name{font-size:15px;font-weight:600;color:#fff;}
+.medecin-spec{font-family:var(--font-m);font-size:10px;color:var(--text-dim);}
+.medecin-tel{font-family:var(--font-m);font-size:12px;color:var(--accent);margin-top:4px;}
+.hopital-list{display:flex;flex-direction:column;gap:8px;}
+.hop-item{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);}
+.hop-item:last-child{border-bottom:none;}
+.hop-icon{font-size:20px;flex-shrink:0;}
+.hop-info{flex:1;}
+.hop-name{font-size:13px;font-weight:600;color:#fff;}
+.hop-spec{font-family:var(--font-m);font-size:9px;color:var(--text-dim);}
+.hop-dist{font-family:var(--font-m);font-size:10px;color:var(--yellow);}
+.hop-tel{font-family:var(--font-m);font-size:11px;color:var(--accent);}
+.cfg-view{padding:14px;display:flex;flex-direction:column;gap:14px;}
+.cfg-section{background:var(--panel);border:1px solid var(--border);}
+.cfg-head{background:var(--panel2);border-bottom:1px solid var(--border);padding:10px 14px;font-family:var(--font-h);font-size:11px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;}
+.cfg-body{padding:14px;display:flex;flex-direction:column;gap:10px;}
+.field-row{display:flex;gap:10px;flex-wrap:wrap;}
+.fg{display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px;}
+.fg label{font-family:var(--font-m);font-size:9px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;}
+.fi{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--font-m);font-size:12px;padding:7px 10px;outline:none;transition:border-color .15s;width:100%;}
+.fi:focus{border-color:var(--accent);}
+select.fi{cursor:pointer;}
+.pers-list-cfg{display:flex;flex-direction:column;gap:6px;}
+.pers-item-cfg{background:var(--bg);border:1px solid var(--border);padding:8px 12px;display:flex;align-items:center;gap:10px;}
+.pers-check{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
+.pers-info{flex:1;}
+.pers-name{font-size:12px;font-weight:600;}
+.pers-fn-txt{font-family:var(--font-m);font-size:9px;color:var(--text-dim);}
+.pers-echo-sel{background:var(--panel2);border:1px solid var(--border);color:var(--text);font-family:var(--font-m);font-size:10px;padding:3px 6px;outline:none;cursor:pointer;}
+.pers-del{background:transparent;border:1px solid var(--border);color:var(--red);width:22px;height:22px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.pers-del:hover{background:rgba(255,34,68,0.1);}
+.echo-cfg-list{display:flex;flex-direction:column;gap:6px;}
+.echo-cfg-item{background:var(--bg);border:1px solid var(--border);padding:8px 12px;display:flex;align-items:center;gap:10px;}
+.echo-cfg-item input,.echo-cfg-item select{background:var(--panel2);border:1px solid var(--border);color:var(--text);font-family:var(--font-m);font-size:11px;padding:4px 8px;outline:none;}
+.hop-cfg-list{display:flex;flex-direction:column;gap:6px;}
+.hop-cfg-item{background:var(--bg);border:1px solid var(--border);padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.hop-cfg-item input{background:var(--panel2);border:1px solid var(--border);color:var(--text);font-family:var(--font-m);font-size:11px;padding:4px 8px;outline:none;flex:1;min-width:80px;}
+.btn-add{background:transparent;border:1px dashed var(--border);color:var(--text-dim);font-family:var(--font-h);font-size:11px;letter-spacing:2px;padding:8px;cursor:pointer;width:100%;text-transform:uppercase;transition:all .15s;}
+.btn-add:hover{border-color:var(--accent);color:var(--accent);}
+.btn-save-cfg{background:var(--accent);border:none;color:var(--bg);font-family:var(--font-h);font-size:13px;font-weight:700;letter-spacing:2px;padding:10px;cursor:pointer;text-transform:uppercase;transition:all .15s;width:100%;}
+.btn-save-cfg:hover{background:#33ddff;}
+.btn-danger-cfg{background:transparent;border:1px solid var(--border);color:var(--red);font-family:var(--font-h);font-size:12px;letter-spacing:1px;padding:8px;cursor:pointer;width:100%;text-transform:uppercase;transition:all .15s;margin-top:4px;}
+.btn-danger-cfg:hover{background:rgba(255,34,68,0.1);border-color:var(--red);}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:2000;justify-content:center;align-items:center;backdrop-filter:blur(4px);}
+.modal-bg.open{display:flex;}
+.modal{background:var(--panel);border:1px solid var(--border);width:500px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;}
+.modal-head{background:var(--bg);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.modal-title{font-family:var(--font-h);font-size:15px;font-weight:700;letter-spacing:3px;color:var(--accent);text-transform:uppercase;}
+.modal-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+.modal-foot{border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:8px;flex-shrink:0;background:var(--bg);}
+.btn-modal-save{flex:1;background:var(--accent);border:none;color:var(--bg);font-family:var(--font-h);font-size:13px;font-weight:700;letter-spacing:2px;padding:9px;cursor:pointer;text-transform:uppercase;transition:all .15s;}
+.btn-modal-save:hover{background:#33ddff;}
+.btn-modal-cancel{background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:var(--font-h);font-size:13px;letter-spacing:1px;padding:9px 16px;cursor:pointer;text-transform:uppercase;}
+.radio-group{display:flex;gap:6px;flex-wrap:wrap;}
+.radio-opt{background:var(--bg);border:1px solid var(--border);color:var(--text-dim);font-family:var(--font-m);font-size:10px;padding:5px 10px;cursor:pointer;transition:all .15s;}
+.radio-opt.sel-evac{border-color:var(--red);color:var(--red);background:rgba(255,34,68,0.08);}
+.radio-opt.sel-poste{border-color:var(--green);color:var(--green);background:rgba(0,255,136,0.08);}
+.statusbar{height:26px;background:var(--panel);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:20px;font-family:var(--font-m);font-size:9px;color:var(--text-dim);flex-shrink:0;}
+.sb-live{display:flex;align-items:center;gap:5px;color:var(--green);}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 1.5s infinite;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);}
+@media(max-width:600px){.nav-tabs{width:44px;}.nav-tab{width:36px;height:36px;font-size:16px;}.echos-grid{grid-template-columns:1fr;}.doc-bar{display:none;}.header-right .clock{display:none;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">ECHO<span>112</span></div>
+  <div class="event-badge" id="event-badge">AUCUN ÉVÉNEMENT CONFIGURÉ</div>
+  <div class="header-right">
+    <div class="clock" id="clock">--:--:--</div>
+    <button class="hbtn" onclick="exportPDF()">📄 PDF</button>
+    <button class="hbtn red" onclick="clearEvent()">🗑 RESET</button>
+  </div>
+</header>
+<div class="doc-bar">
+  <div class="doc-item"><span class="doc-label">MÉDECIN:</span><span class="doc-val" id="db-medecin">—</span></div>
+  <div class="doc-item"><span class="doc-label">DISPO:</span><span class="doc-val green" id="db-dispo">0</span></div>
+  <div class="doc-item"><span class="doc-label">INTER:</span><span class="doc-val red" id="db-inter">0</span></div>
+  <div class="doc-item"><span class="doc-label">PAUSE:</span><span class="doc-val yellow" id="db-pause">0</span></div>
+  <div class="doc-item"><span class="doc-label">INTERV. TOTALES:</span><span class="doc-val" id="db-total">0</span></div>
+  <div class="doc-item"><span class="doc-label">ÉVACUATIONS:</span><span class="doc-val red" id="db-evac">0</span></div>
+</div>
+<div class="main">
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showView('echos',this)" title="Équipes">👥</button>
+    <button class="nav-tab" onclick="showView('grille',this)" title="Quadrillage">🗺️</button>
+    <button class="nav-tab" onclick="showView('interventions',this)" title="Interventions">🚨<span class="badge" id="badge-inter" style="display:none">0</span></button>
+    <button class="nav-tab" onclick="showView('maincourante',this)" title="Main courante">📋</button>
+    <button class="nav-tab" onclick="showView('ressources',this)" title="Ressources">🏥</button>
+    <button class="nav-tab" onclick="showView('config',this)" title="Configuration">⚙️</button>
+  </div>
+  <div class="content">
+    <div class="view-panel active" id="view-echos"><div class="echos-grid" id="echos-grid"></div></div>
+    <div class="view-panel" id="view-grille">
+      <div class="grid-view">
+        <div class="grid-controls">
+          <span style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">COLONNES:</span>
+          <input type="number" class="fi" id="grid-cols" value="8" min="3" max="20" style="width:60px" oninput="renderGrid()">
+          <span style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">LIGNES:</span>
+          <input type="number" class="fi" id="grid-rows" value="6" min="3" max="20" style="width:60px" oninput="renderGrid()">
+          <span style="font-family:var(--font-m);font-size:9px;color:var(--text-dim)">| CLIC = poste de soins</span>
+          <span style="font-family:var(--font-m);font-size:9px;color:var(--green)">🟢 POSTE: <span id="poste-label">NON DÉFINI</span></span>
+        </div>
+        <div class="grid-wrap" id="grid-wrap"></div>
+      </div>
+    </div>
+    <div class="view-panel" id="view-interventions">
+      <div class="inter-view">
+        <div class="inter-stats">
+          <div class="stat-card"><div class="stat-label">TOTALES</div><div class="stat-val b" id="st-total">0</div></div>
+          <div class="stat-card"><div class="stat-label">POSTE SOINS</div><div class="stat-val g" id="st-poste">0</div></div>
+          <div class="stat-card"><div class="stat-label">ÉVACUATIONS</div><div class="stat-val r" id="st-evac">0</div></div>
+          <div class="stat-card"><div class="stat-label">PATIENTS</div><div class="stat-val y" id="st-patients">0</div></div>
+        </div>
+        <div class="inter-list" id="inter-list"></div>
+        <div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim);text-align:center;padding:20px" id="inter-empty">Aucune intervention</div>
+      </div>
+    </div>
+    <div class="view-panel" id="view-maincourante">
+      <div class="mc-view">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-family:var(--font-h);font-size:11px;letter-spacing:3px;color:var(--text-dim)">JOURNAL</div>
+          <button class="hbtn" onclick="exportPDF()">📄 EXPORT PDF</button>
+        </div>
+        <div class="mc-list" id="mc-list"></div>
+        <div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim);text-align:center;padding:20px" id="mc-empty">Aucun événement</div>
+      </div>
+    </div>
+    <div class="view-panel" id="view-ressources">
+      <div class="res-view">
+        <div class="res-section">
+          <div class="res-head"><div class="res-title">👨‍⚕️ Médecin de permanence</div></div>
+          <div class="res-body" id="medecin-display"><div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Non configuré</div></div>
+        </div>
+        <div class="res-section">
+          <div class="res-head"><div class="res-title">🏥 Hôpitaux à proximité</div></div>
+          <div class="res-body"><div class="hopital-list" id="hopital-list"><div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Non configuré</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="view-panel" id="view-config">
+      <div class="cfg-view">
+        <div class="cfg-section">
+          <div class="cfg-head">Événement</div>
+          <div class="cfg-body">
+            <div class="field-row">
+              <div class="fg" style="flex:2"><label>Nom</label><input class="fi" id="cfg-evname" placeholder="Festival, Course…"></div>
+              <div class="fg" style="max-width:130px"><label>Date</label><input class="fi" id="cfg-evdate" type="date"></div>
+            </div>
+            <div class="field-row"><div class="fg"><label>Lieu</label><input class="fi" id="cfg-evlieu" placeholder="Ville, Site…"></div></div>
+          </div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-head">Médecin de permanence</div>
+          <div class="cfg-body">
+            <div class="field-row">
+              <div class="fg"><label>Nom complet</label><input class="fi" id="cfg-med-nom" placeholder="Dr. Martin"></div>
+              <div class="fg" style="max-width:160px"><label>Spécialité</label><input class="fi" id="cfg-med-spec" placeholder="Urgentiste"></div>
+            </div>
+            <div class="field-row"><div class="fg" style="max-width:160px"><label>Téléphone</label><input class="fi" id="cfg-med-tel" placeholder="06 XX XX XX XX"></div></div>
+          </div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-head">Hôpitaux</div>
+          <div class="cfg-body"><div class="hop-cfg-list" id="hop-cfg-list"></div><button class="btn-add" onclick="addHopital()">+ AJOUTER UN HÔPITAL</button></div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-head">Équipes Echo</div>
+          <div class="cfg-body"><div class="echo-cfg-list" id="echo-cfg-list"></div><button class="btn-add" onclick="addEcho()">+ AJOUTER UN ECHO</button></div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-head">Personnel</div>
+          <div class="cfg-body">
+            <div style="background:var(--bg);border:1px solid var(--border);padding:10px;margin-bottom:10px">
+              <div class="field-row">
+                <div class="fg"><label>Prénom</label><input class="fi" id="new-prenom" placeholder="Prénom"></div>
+                <div class="fg"><label>Nom</label><input class="fi" id="new-nom" placeholder="Nom"></div>
+                <div class="fg" style="max-width:150px"><label>Fonction</label>
+                  <select class="fi" id="new-fn">
+                    <option value="AMB">🚑 Ambulancier</option>
+                    <option value="SEC">🩹 Secouriste</option>
+                    <option value="INF">💉 Infirmier</option>
+                    <option value="SIS">🏥 Infirmier SISU</option>
+                    <option value="MED">👨‍⚕️ Médecin</option>
+                  </select>
+                </div>
+                <div class="fg" style="max-width:80px;justify-content:flex-end"><label>&nbsp;</label>
+                  <button class="btn-save-cfg" style="font-size:11px;padding:7px" onclick="addPersonnel()">+ ADD</button>
+                </div>
+              </div>
+            </div>
+            <div class="pers-list-cfg" id="pers-list-cfg"></div>
+          </div>
+        </div>
+        <button class="btn-save-cfg" onclick="saveConfig()">💾 ENREGISTRER</button>
+        <button class="btn-danger-cfg" onclick="clearEvent()">🗑️ EFFACER LES DONNÉES</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="statusbar">
+  <div class="sb-live"><div class="sb-dot"></div>SYSTÈME ACTIF</div>
+  <span id="sb-event">AUCUN ÉVÉNEMENT</span>
+  <span id="sb-time">—</span>
+</div>
+<div class="modal-bg" id="modal-inter">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">🚨 FICHE INTERVENTION</div>
+      <button style="background:transparent;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;cursor:pointer;font-size:14px" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label>Équipe Echo</label><select class="fi" id="mi-echo"></select></div>
+      <div class="fg"><label>Localisation (ex: B3)</label><input class="fi" id="mi-loc" placeholder="Zone du quadrillage"></div>
+      <div class="fg"><label>Type d'intervention</label><input class="fi" id="mi-type" placeholder="Malaise, Chute, Traumatisme…"></div>
+      <div class="fg"><label>Nombre de patients</label><input class="fi" id="mi-patients" type="number" value="1" min="1"></div>
+      <div class="fg"><label>Prise en charge</label>
+        <div class="radio-group">
+          <div class="radio-opt" onclick="selectPEC('poste')" id="pec-poste">🏕️ POSTE DE SOINS</div>
+          <div class="radio-opt" onclick="selectPEC('evac')" id="pec-evac">🏥 ÉVACUATION HÔPITAL</div>
+        </div>
+      </div>
+      <div class="fg" id="mi-hop-wrap" style="display:none"><label>Hôpital</label><input class="fi" id="mi-hop" placeholder="Nom de l'hôpital"></div>
+      <div class="fg"><label>Notes</label><input class="fi" id="mi-notes" placeholder="Informations…"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-modal-cancel" onclick="closeModal()">ANNULER</button>
+      <button class="btn-modal-save" onclick="saveIntervention()">ENREGISTRER</button>
+    </div>
+  </div>
+</div>
+<script>
+let S={event:{name:'',date:'',lieu:''},medecin:{nom:'',spec:'',tel:''},hopitaux:[],echos:[],personnel:[],actifs:[],statuts:{},timers:{},interventions:[],mainCourante:[],grille:{poste:null},echoGrid:{}};
+let cfgEchos=[],cfgPersonnel=[],cfgHopitaux=[],selectedPEC='';
+const FN={AMB:'Ambulancier',SEC:'Secouriste',INF:'Infirmier',SIS:'Infirmier SISU',MED:'Médecin'};
+const SL={dispo:'DISPONIBLE',inter:'INTERVENTION',pause:'PAUSE'};
+function now(){return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
+function nowFull(){return new Date().toLocaleString('fr-FR');}
+function getEchoMembers(id){return S.actifs.filter(a=>a.present&&a.echoId==id).map(a=>S.personnel.find(p=>p.id===a.persId)).filter(Boolean);}
+function logMC(type,text){S.mainCourante.unshift({type,text,time:now()});renderMC();}
+function shortEcho(n){return n.replace(/Echo\s*/i,'E');}
+function showView(name,el){
+  document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  if(el)el.classList.add('active');
+  if(name==='grille')renderGrid();
+  if(name==='interventions')renderInterventions();
+  if(name==='ressources')renderRessources();
+  if(name==='config')renderConfig();
+}
+function renderEchos(){
+  const grid=document.getElementById('echos-grid');
+  grid.innerHTML='';
+  let counts={dispo:0,inter:0,pause:0};
+  S.echos.forEach(echo=>{
+    const status=S.statuts[echo.id]||'dispo';
+    counts[status]++;
+    const members=getEchoMembers(echo.id);
+    const mHtml=members.map(p=>`<span class="mtag">${p.prenom} ${p.nom}<span class="fn-badge fn-${p.fn}">${p.fn}</span></span>`).join('')||'<span style="font-size:9px;color:var(--text-dim)">—</span>';
+    const card=document.createElement('div');
+    card.className='echo-card s-'+status;
+    card.id='echo-card-'+echo.id;
+    card.innerHTML=`
+      <div class="ec-head"><div class="ec-name">${echo.name}</div><div class="ec-canal">📻 ${echo.canal||'—'}</div></div>
+      <div class="ec-status"><div class="sdot"></div>${SL[status]}</div>
+      <div class="ec-members">${mHtml}</div>
+      <div class="ec-timer" id="timer-${echo.id}">⏱ 00:00</div>
+      <div class="ec-btns">
+        <button class="sbtn sbtn-dispo ${status==='dispo'?'on':''}" onclick="setStatus(${echo.id},'dispo')">✔ DISPO</button>
+        <button class="sbtn sbtn-inter ${status==='inter'?'on':''}" onclick="setStatus(${echo.id},'inter')">🔴 INTER</button>
+        <button class="sbtn sbtn-pause ${status==='pause'?'on':''}" onclick="setStatus(${echo.id},'pause')">⏸ PAUSE</button>
+      </div>
+      <button class="btn-inter-detail" onclick="openInterModal(${echo.id})">📋 FICHE INTERVENTION</button>`;
+    grid.appendChild(card);
+  });
+  document.getElementById('db-dispo').textContent=counts.dispo;
+  document.getElementById('db-inter').textContent=counts.inter;
+  document.getElementById('db-pause').textContent=counts.pause;
+  document.getElementById('db-medecin').textContent=S.medecin.nom||'—';
+  document.getElementById('db-total').textContent=S.interventions.length;
+  document.getElementById('db-evac').textContent=S.interventions.filter(i=>i.pec==='evac').length;
+  const ic=S.echos.filter(e=>S.statuts[e.id]==='inter').length;
+  const b=document.getElementById('badge-inter');
+  if(ic>0){b.textContent=ic;b.style.display='flex';}else b.style.display='none';
+}
+function setStatus(echoId,status){
+  const prev=S.statuts[echoId];
+  S.statuts[echoId]=status;
+  const echo=S.echos.find(e=>e.id===echoId);
+  if(status==='inter'&&prev!=='inter'){S.timers[echoId]={start:Date.now()};logMC('inter',`${echo.name} → INTERVENTION`);}
+  else if(prev==='inter'&&status!=='inter'){delete S.timers[echoId];}
+  if(status==='dispo'&&prev!=='dispo')logMC('dispo',`${echo.name} → DISPONIBLE`);
+  if(status==='pause')logMC('pause',`${echo.name} → PAUSE`);
+  renderEchos();renderGrid();
+}
+function updateTimers(){
+  Object.keys(S.timers).forEach(id=>{
+    const e=Math.floor((Date.now()-S.timers[id].start)/1000);
+    const m=String(Math.floor(e/60)).padStart(2,'0');
+    const s=String(e%60).padStart(2,'0');
+    const el=document.getElementById('timer-'+id);
+    if(el)el.textContent=`⏱ ${m}:${s}`;
+  });
+}
+function renderGrid(){
+  const cols=parseInt(document.getElementById('grid-cols').value)||8;
+  const rows=parseInt(document.getElementById('grid-rows').value)||6;
+  const wrap=document.getElementById('grid-wrap');
+  const L='ABCDEFGHIJKLMNOPQRST';
+  let html='<table class="grid-table"><thead><tr><th></th>';
+  for(let c=1;c<=cols;c++)html+=`<th>${c}</th>`;
+  html+='</tr></thead><tbody>';
+  for(let r=0;r<rows;r++){
+    html+=`<tr><th>${L[r]}</th>`;
+    for(let c=1;c<=cols;c++){
+      const k=L[r]+c;
+      const isPoste=S.grille.poste===k;
+      const echosHere=Object.entries(S.echoGrid).filter(([,v])=>v===k).map(([k])=>k);
+      html+=`<td class="${isPoste?'poste':''}" onclick="handleGridClick('${k}')">
+        <div class="cell-label">${k}</div>
+        ${isPoste?'<div class="poste-icon">🏕️</div>':''}
+        <div class="cell-echos">${echosHere.map(eid=>{const e=S.echos.find(x=>x.id==eid);const st=S.statuts[eid]||'dispo';return e?`<div class="cell-echo-badge s-${st}">${shortEcho(e.name)}</div>`:''}).join('')}</div>
+      </td>`;
+    }
+    html+='</tr>';
+  }
+  html+='</tbody></table>';
+  wrap.innerHTML=html;
+  document.getElementById('poste-label').textContent=S.grille.poste||'NON DÉFINI';
+}
+function handleGridClick(k){
+  S.grille.poste=S.grille.poste===k?null:k;
+  logMC('config',S.grille.poste?`Poste de soins → ${k}`:'Poste de soins supprimé');
+  renderGrid();
+}
+function openInterModal(echoId){
+  const sel=document.getElementById('mi-echo');
+  sel.innerHTML=S.echos.map(e=>`<option value="${e.id}" ${e.id===echoId?'selected':''}>${e.name}</option>`).join('');
+  ['mi-loc','mi-type','mi-notes','mi-hop'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mi-patients').value='1';
+  selectedPEC='';
+  document.querySelectorAll('.radio-opt').forEach(o=>o.classList.remove('sel-evac','sel-poste'));
+  document.getElementById('mi-hop-wrap').style.display='none';
+  document.getElementById('modal-inter').classList.add('open');
+}
+function selectPEC(type){
+  selectedPEC=type;
+  document.querySelectorAll('.radio-opt').forEach(o=>o.classList.remove('sel-evac','sel-poste'));
+  document.getElementById('pec-'+type).classList.add('sel-'+type);
+  document.getElementById('mi-hop-wrap').style.display=type==='evac'?'block':'none';
+}
+function closeModal(){document.getElementById('modal-inter').classList.remove('open');}
+function saveIntervention(){
+  const echoId=parseInt(document.getElementById('mi-echo').value);
+  const echo=S.echos.find(e=>e.id===echoId);
+  const inter={id:Date.now(),echoId,echoName:echo?.name||'?',loc:document.getElementById('mi-loc').value||'—',type:document.getElementById('mi-type').value||'Non précisé',patients:parseInt(document.getElementById('mi-patients').value)||1,pec:selectedPEC||'poste',hop:document.getElementById('mi-hop').value||'',notes:document.getElementById('mi-notes').value||'',time:now()};
+  S.interventions.unshift(inter);
+  const pecText=inter.pec==='evac'?`ÉVACUATION → ${inter.hop||'hôpital'}`:'POSTE DE SOINS';
+  logMC('evac',`${inter.echoName} — ${inter.type} en ${inter.loc} — ${inter.patients} patient(s) — ${pecText}`);
+  closeModal();renderInterventions();
+  document.getElementById('db-total').textContent=S.interventions.length;
+  document.getElementById('db-evac').textContent=S.interventions.filter(i=>i.pec==='evac').length;
+}
+function renderInterventions(){
+  const list=document.getElementById('inter-list');
+  const empty=document.getElementById('inter-empty');
+  list.innerHTML='';
+  empty.style.display=S.interventions.length?'none':'block';
+  let totalP=0;
+  S.interventions.forEach(inter=>{
+    totalP+=inter.patients;
+    const evac=inter.pec==='evac';
+    const item=document.createElement('div');
+    item.className='inter-item '+(evac?'evac':'poste');
+    item.innerHTML=`<div class="inter-head"><div class="inter-echo">${inter.echoName}</div><div style="display:flex;gap:6px;align-items:center"><span class="inter-badge ${evac?'evac':'poste'}">${evac?'🏥 ÉVAC':'🏕️ POSTE'}</span><span class="inter-time">${inter.time}</span></div></div><div class="inter-info"><strong style="color:var(--text)">${inter.type}</strong> — Zone: <strong>${inter.loc}</strong> — ${inter.patients} patient(s)${evac&&inter.hop?' — → '+inter.hop:''}${inter.notes?'<br><span style="color:var(--text-dim)">'+inter.notes+'</span>':''}</div>`;
+    list.appendChild(item);
+  });
+  document.getElementById('st-total').textContent=S.interventions.length;
+  document.getElementById('st-poste').textContent=S.interventions.filter(i=>i.pec!=='evac').length;
+  document.getElementById('st-evac').textContent=S.interventions.filter(i=>i.pec==='evac').length;
+  document.getElementById('st-patients').textContent=totalP;
+}
+function renderMC(){
+  const list=document.getElementById('mc-list');
+  const empty=document.getElementById('mc-empty');
+  list.innerHTML='';
+  empty.style.display=S.mainCourante.length?'none':'block';
+  S.mainCourante.forEach(e=>{const item=document.createElement('div');item.className='mc-item type-'+e.type;item.innerHTML=`<div class="mc-time">${e.time}</div><div class="mc-text">${e.text}</div>`;list.appendChild(item);});
+}
+function renderRessources(){
+  const md=document.getElementById('medecin-display');
+  md.innerHTML=S.medecin.nom?`<div class="medecin-card"><div class="medecin-avatar">👨‍⚕️</div><div class="medecin-info"><div class="medecin-name">${S.medecin.nom}</div><div class="medecin-spec">${S.medecin.spec||''}</div><div class="medecin-tel">📞 ${S.medecin.tel||'—'}</div></div></div>`:'<div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Non configuré</div>';
+  const hl=document.getElementById('hopital-list');
+  hl.innerHTML=S.hopitaux.length?S.hopitaux.map(h=>`<div class="hop-item"><div class="hop-icon">🏥</div><div class="hop-info"><div class="hop-name">${h.nom}</div><div class="hop-spec">${h.spec||''}</div></div><div style="text-align:right"><div class="hop-dist">📍 ${h.dist||'—'}</div><div class="hop-tel">📞 ${h.tel||'—'}</div></div></div>`).join(''):'<div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Non configuré</div>';
+}
+function renderConfig(){
+  document.getElementById('cfg-evname').value=S.event.name;
+  document.getElementById('cfg-evdate').value=S.event.date;
+  document.getElementById('cfg-evlieu').value=S.event.lieu;
+  document.getElementById('cfg-med-nom').value=S.medecin.nom;
+  document.getElementById('cfg-med-spec').value=S.medecin.spec;
+  document.getElementById('cfg-med-tel').value=S.medecin.tel;
+  cfgEchos=S.echos.map(e=>({...e}));
+  cfgPersonnel=S.personnel.map(p=>({...p}));
+  cfgHopitaux=S.hopitaux.map(h=>({...h}));
+  renderEchosCfg();renderPersCfg();renderHopCfg();
+}
+function renderEchosCfg(){
+  const list=document.getElementById('echo-cfg-list');
+  list.innerHTML='';
+  cfgEchos.forEach((e,idx)=>{
+    const item=document.createElement('div');
+    item.className='echo-cfg-item';
+    item.innerHTML=`<span style="font-family:var(--font-m);font-size:9px;color:var(--text-dim);min-width:20px">#${idx+1}</span><input value="${e.name}" placeholder="Echo ${idx+1}" oninput="cfgEchos[${idx}].name=this.value" style="flex:1"><input value="${e.canal||''}" placeholder="Canal radio" oninput="cfgEchos[${idx}].canal=this.value" style="max-width:120px"><button class="pers-del" onclick="cfgEchos.splice(${idx},1);renderEchosCfg()">✕</button>`;
+    list.appendChild(item);
+  });
+}
+function addEcho(){cfgEchos.push({id:Date.now(),name:'Echo '+(cfgEchos.length+1),canal:''});renderEchosCfg();}
+function renderPersCfg(){
+  const list=document.getElementById('pers-list-cfg');
+  list.innerHTML='';
+  cfgPersonnel.forEach((p,idx)=>{
+    const actif=S.actifs.find(a=>a.persId===p.id)||{present:false,echoId:S.echos[0]?.id};
+    const echoOpts=cfgEchos.map(e=>`<option value="${e.id}" ${actif.echoId==e.id?'selected':''}>${e.name}</option>`).join('');
+    const item=document.createElement('div');
+    item.className='pers-item-cfg';
+    item.innerHTML=`<input type="checkbox" class="pers-check" ${actif.present?'checked':''} onchange="updateActif(${p.id},this.checked)"><div class="pers-info"><div class="pers-name">${p.prenom} ${p.nom}</div><div class="pers-fn-txt">${FN[p.fn]}</div></div><span class="fn-badge fn-${p.fn}">${p.fn}</span><select class="pers-echo-sel" onchange="updateEchoActif(${p.id},this.value)">${echoOpts}</select><button class="pers-del" onclick="cfgPersonnel.splice(${idx},1);renderPersCfg()">✕</button>`;
+    list.appendChild(item);
+  });
+}
+function updateActif(persId,present){const idx=S.actifs.findIndex(a=>a.persId===persId);if(idx>=0)S.actifs[idx].present=present;else S.actifs.push({persId,echoId:S.echos[0]?.id,present});}
+function updateEchoActif(persId,echoId){const idx=S.actifs.findIndex(a=>a.persId===persId);if(idx>=0)S.actifs[idx].echoId=parseInt(echoId);else S.actifs.push({persId,echoId:parseInt(echoId),present:false});}
+function addPersonnel(){
+  const prenom=document.getElementById('new-prenom').value.trim();
+  const nom=document.getElementById('new-nom').value.trim();
+  const fn=document.getElementById('new-fn').value;
+  if(!prenom||!nom)return;
+  cfgPersonnel.push({id:Date.now(),prenom,nom,fn});
+  document.getElementById('new-prenom').value='';
+  document.getElementById('new-nom').value='';
+  renderPersCfg();
+}
+function renderHopCfg(){
+  const list=document.getElementById('hop-cfg-list');
+  list.innerHTML='';
+  cfgHopitaux.forEach((h,idx)=>{
+    const item=document.createElement('div');
+    item.className='hop-cfg-item';
+    item.innerHTML=`<input value="${h.nom||''}" placeholder="Nom hôpital" oninput="cfgHopitaux[${idx}].nom=this.value"><input value="${h.spec||''}" placeholder="Spécialité" oninput="cfgHopitaux[${idx}].spec=this.value"><input value="${h.dist||''}" placeholder="Distance" style="max-width:80px" oninput="cfgHopitaux[${idx}].dist=this.value"><input value="${h.tel||''}" placeholder="Téléphone" oninput="cfgHopitaux[${idx}].tel=this.value"><button class="pers-del" onclick="cfgHopitaux.splice(${idx},1);renderHopCfg()">✕</button>`;
+    list.appendChild(item);
+  });
+}
+function addHopital(){cfgHopitaux.push({nom:'',spec:'',dist:'',tel:''});renderHopCfg();}
+function saveConfig(){
+  S.event={name:document.getElementById('cfg-evname').value.trim(),date:document.getElementById('cfg-evdate').value,lieu:document.getElementById('cfg-evlieu').value.trim()};
+  S.medecin={nom:document.getElementById('cfg-med-nom').value.trim(),spec:document.getElementById('cfg-med-spec').value.trim(),tel:document.getElementById('cfg-med-tel').value.trim()};
+  S.echos=[...cfgEchos];S.personnel=[...cfgPersonnel];S.hopitaux=[...cfgHopitaux];
+  S.echos.forEach(e=>{if(!S.statuts[e.id])S.statuts[e.id]='dispo';});
+  const evLabel=S.event.name?(S.event.name+(S.event.lieu?' — '+S.event.lieu:'')).toUpperCase():'AUCUN ÉVÉNEMENT';
+  document.getElementById('event-badge').textContent=evLabel;
+  document.getElementById('sb-event').textContent=evLabel;
+  logMC('config','Configuration enregistrée — '+(S.event.name||'Événement'));
+  renderEchos();alert('✅ Configuration enregistrée !');
+}
+function clearEvent(){
+  if(!confirm('Effacer les données de l\'événement ?'))return;
+  S.interventions=[];S.mainCourante=[];S.echoGrid={};S.grille.poste=null;
+  S.echos.forEach(e=>S.statuts[e.id]='dispo');
+  logMC('config','Données effacées');renderEchos();
+}
+function exportPDF(){
+  const evacs=S.interventions.filter(i=>i.pec==='evac').length;
+  const totalPat=S.interventions.reduce((s,i)=>s+i.patients,0);
+  let html=`<html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:12px;padding:20px}h1{font-size:18px;color:#003366}h2{font-size:13px;color:#003366;border-bottom:1px solid #ccc;margin-top:16px}table{width:100%;border-collapse:collapse;margin-top:8px}th{background:#003366;color:#fff;padding:5px 8px;font-size:11px;text-align:left}td{padding:4px 8px;border-bottom:1px solid #eee;font-size:11px}.stat{display:inline-block;margin-right:16px}.stat strong{font-size:16px;display:block}</style></head><body>
+  <h1>🚑 ECHO 112 — Rapport ${S.event.name||''}</h1>
+  <p>Lieu: ${S.event.lieu||'—'} | Date: ${S.event.date||'—'} | Généré: ${nowFull()}</p>
+  ${S.medecin.nom?`<p>Médecin: <strong>${S.medecin.nom}</strong> — ${S.medecin.tel}</p>`:''}
+  <h2>Bilan</h2>
+  <div><div class="stat"><strong>${S.interventions.length}</strong>Interventions</div><div class="stat"><strong>${evacs}</strong>Évacuations</div><div class="stat"><strong>${totalPat}</strong>Patients</div></div>
+  <h2>Interventions</h2>
+  <table><tr><th>Heure</th><th>Équipe</th><th>Type</th><th>Zone</th><th>Patients</th><th>Prise en charge</th></tr>
+  ${S.interventions.map(i=>`<tr><td>${i.time}</td><td>${i.echoName}</td><td>${i.type}</td><td>${i.loc}</td><td>${i.patients}</td><td>${i.pec==='evac'?'ÉVAC → '+(i.hop||''):'Poste soins'}</td></tr>`).join('')}
+  </table>
+  <h2>Main courante</h2>
+  <table><tr><th>Heure</th><th>Événement</th></tr>
+  ${[...S.mainCourante].reverse().map(e=>`<tr><td>${e.time}</td><td>${e.text}</td></tr>`).join('')}
+  </table>
+  </body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();w.print();
+}
+window.addEventListener('load',()=>{
+  S.echos=[{id:1,name:'Echo 1',canal:'Canal 3'},{id:2,name:'Echo 2',canal:'Canal 5'},{id:3,name:'Echo 3',canal:'Canal 7'}];
+  S.personnel=[{id:1,prenom:'Martin',nom:'Dupont',fn:'AMB'},{id:2,prenom:'Sophie',nom:'Bernard',fn:'SEC'},{id:3,prenom:'Karim',nom:'Lefebvre',fn:'INF'}];
+  S.actifs=[{persId:1,echoId:1,present:true},{persId:2,echoId:2,present:true},{persId:3,echoId:3,present:true}];
+  S.statuts={1:'dispo',2:'dispo',3:'dispo'};
+  S.medecin={nom:'Dr. Sophie Martin',spec:'Urgentiste',tel:'06 12 34 56 78'};
+  S.hopitaux=[{nom:'CHU Pellegrin',spec:'Urgences',dist:'4.2 km',tel:'05 56 79 56 79'}];
+  logMC('config','Système ECHO 112 initialisé');
+  renderEchos();
+  setInterval(()=>{const t=new Date().toLocaleTimeString('fr-FR');document.getElementById('clock').textContent=t;document.getElementById('sb-time').textContent=t;updateTimers();},1000);
+});
+</script>
+</body>
+</html>
