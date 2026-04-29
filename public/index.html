@@ -638,7 +638,7 @@ function exportPDF(){
 }
 function saveToFirebase(){
   if(!window.db)return;
-  window.fbSet(window.fbRef(window.db,'echo112/state'),{
+  window.db.ref('echo112/state').set({
     event:S.event,
     medecin:S.medecin,
     hopitaux:S.hopitaux,
@@ -655,7 +655,7 @@ function saveToFirebase(){
 
 function loadFromFirebase(){
   if(!window.db)return;
-  window.fbOnValue(window.fbRef(window.db,'echo112/state'),(snap)=>{
+  window.db.ref('echo112/state').once('value',(snap)=>{
     const data=snap.val();
     if(!data)return;
     Object.assign(S,data);
@@ -663,8 +663,9 @@ function loadFromFirebase(){
     document.getElementById('event-badge').textContent=evLabel;
     document.getElementById('sb-event').textContent=evLabel;
     renderEchos();
-  },{onlyOnce:true});
+  });
 }
+
 
 window.addEventListener('load',()=>{
   S.echos=[{id:1,name:'Echo 1',canal:'Canal 3'},{id:2,name:'Echo 2',canal:'Canal 5'},{id:3,name:'Echo 3',canal:'Canal 7'}];
