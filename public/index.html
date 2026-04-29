@@ -638,6 +638,36 @@ function exportPDF(){
   </body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();w.print();
 }
+function saveToFirebase(){
+  if(!window.db)return;
+  window.fbSet(window.fbRef(window.db,'echo112/state'),{
+    event:S.event,
+    medecin:S.medecin,
+    hopitaux:S.hopitaux,
+    echos:S.echos,
+    personnel:S.personnel,
+    actifs:S.actifs,
+    statuts:S.statuts,
+    interventions:S.interventions,
+    mainCourante:S.mainCourante,
+    grille:S.grille
+  }).then(()=>console.log('✅ Sauvegardé'))
+  .catch(e=>console.error('❌',e));
+}
+
+function loadFromFirebase(){
+  if(!window.db)return;
+  window.fbOnValue(window.fbRef(window.db,'echo112/state'),(snap)=>{
+    const data=snap.val();
+    if(!data)return;
+    Object.assign(S,data);
+    const evLabel=S.event?.name?(S.event.name+(S.event.lieu?' — '+S.event.lieu:'')).toUpperCase():'AUCUN ÉVÉNEMENT';
+    document.getElementById('event-badge').textContent=evLabel;
+    document.getElementById('sb-event').textContent=evLabel;
+    renderEchos();
+  },{onlyOnce:true});
+}
+
 window.addEventListener('load',()=>{
   S.echos=[{id:1,name:'Echo 1',canal:'Canal 3'},{id:2,name:'Echo 2',canal:'Canal 5'},{id:3,name:'Echo 3',canal:'Canal 7'}];
   S.personnel=[{id:1,prenom:'Martin',nom:'Dupont',fn:'AMB'},{id:2,prenom:'Sophie',nom:'Bernard',fn:'SEC'},{id:3,prenom:'Karim',nom:'Lefebvre',fn:'INF'}];
@@ -647,6 +677,8 @@ window.addEventListener('load',()=>{
   S.hopitaux=[{nom:'CHU Pellegrin',spec:'Urgences',dist:'4.2 km',tel:'05 56 79 56 79'}];
   logMC('config','Système ECHO 112 initialisé');
   renderEchos();
+  loadFromFirebase();
+setInterval(saveToFirebase, 30000);
   setInterval(()=>{const t=new Date().toLocaleTimeString('fr-FR');document.getElementById('clock').textContent=t;document.getElementById('sb-time').textContent=t;updateTimers();},1000);
 });
 </script>
