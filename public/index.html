@@ -5,24 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ECHO 112 — Poste de Secours</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBXw5aieOHSv9aQsjjtEnUa0DYvcvozv34",
-    authDomain: "echo112.firebaseapp.com",
-    databaseURL: "https://echo112-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "echo112",
-    storageBucket: "echo112.firebasestorage.app",
-    messagingSenderId: "552122882151",
-    appId: "1:552122882151:web:aa7b9c194e7bce85749cc2"
-  };
-  firebase.initializeApp(firebaseConfig);
-  window.db = firebase.database();
-  console.log("Firebase connecté ✅");
+const firebaseConfig={apiKey:"AIzaSyBXw5aieOHSv9aQsjjtEnUa0DYvcvozv34",authDomain:"echo112.firebaseapp.com",databaseURL:"https://echo112-default-rtdb.europe-west1.firebasedatabase.app",projectId:"echo112",storageBucket:"echo112.firebasestorage.app",messagingSenderId:"552122882151",appId:"1:552122882151:web:aa7b9c194e7bce85749cc2"};
+firebase.initializeApp(firebaseConfig);
+window.db=firebase.database();
+console.log("Firebase connecté ✅");
 </script>
-
-
 <style>
 :root{--bg:#07090d;--panel:#0d1117;--panel2:#111820;--border:#1a2d3f;--accent:#00d4ff;--green:#00ff88;--red:#ff2244;--yellow:#ffcc00;--orange:#ff8800;--text:#c8dae8;--text-dim:#4a6a80;--font-h:'Rajdhani',sans-serif;--font-m:'Share Tech Mono',monospace;--font-b:'Exo 2',sans-serif;}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -76,6 +68,7 @@ header{background:var(--panel);border-bottom:2px solid var(--border);height:52px
 .fn-badge{font-size:8px;padding:1px 4px;font-family:var(--font-m);}
 .fn-AMB{background:rgba(0,212,255,0.15);color:var(--accent);}
 .fn-SEC{background:rgba(0,255,136,0.12);color:var(--green);}
+.fn-A112{background:rgba(255,136,0,0.15);color:var(--orange);}
 .fn-INF{background:rgba(255,204,0,0.12);color:var(--yellow);}
 .fn-SIS{background:rgba(255,136,0,0.15);color:var(--orange);}
 .fn-MED{background:rgba(255,34,68,0.15);color:var(--red);}
@@ -89,22 +82,19 @@ header{background:var(--panel);border-bottom:2px solid var(--border);height:52px
 .btn-inter-detail{width:100%;background:rgba(255,34,68,0.1);border:1px solid var(--red);color:var(--red);font-family:var(--font-h);font-size:11px;letter-spacing:1px;padding:5px;cursor:pointer;text-transform:uppercase;transition:all .15s;display:none;}
 .s-inter .btn-inter-detail{display:block;}
 .btn-inter-detail:hover{background:rgba(255,34,68,0.2);}
-.grid-view{padding:14px;flex:1;display:flex;flex-direction:column;gap:12px;}
-.grid-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-.grid-wrap{flex:1;overflow:auto;border:1px solid var(--border);background:var(--panel);}
-.grid-table{border-collapse:collapse;}
-.grid-table th,.grid-table td{border:1px solid rgba(26,45,63,0.6);}
-.grid-table th{background:var(--panel2);font-family:var(--font-m);font-size:11px;color:var(--accent);padding:6px 10px;text-align:center;min-width:60px;}
-.grid-table td{width:80px;height:60px;text-align:center;vertical-align:middle;position:relative;cursor:pointer;transition:background .1s;}
-.grid-table td:hover{background:rgba(0,212,255,0.05);}
-.grid-table td.poste{background:rgba(0,255,136,0.08);border:2px solid var(--green)!important;}
-.cell-label{font-family:var(--font-m);font-size:8px;color:rgba(74,106,128,0.5);position:absolute;top:2px;left:3px;}
-.cell-echos{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;align-items:center;padding:4px;}
-.cell-echo-badge{font-family:var(--font-h);font-size:11px;font-weight:700;padding:1px 5px;border-radius:2px;}
-.cell-echo-badge.s-dispo{background:rgba(0,255,136,0.2);color:var(--green);border:1px solid var(--green);}
-.cell-echo-badge.s-inter{background:rgba(255,34,68,0.2);color:var(--red);border:1px solid var(--red);}
-.cell-echo-badge.s-pause{background:rgba(255,204,0,0.2);color:var(--yellow);border:1px solid var(--yellow);}
-.poste-icon{font-size:16px;}
+
+/* MAP GRID VIEW */
+.map-grid-view{flex:1;display:flex;flex-direction:column;position:relative;}
+.map-grid-controls{background:rgba(13,17,23,0.95);border-bottom:1px solid var(--border);padding:8px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;flex-shrink:0;z-index:500;}
+.map-container{flex:1;position:relative;}
+#terrain-map{width:100%;height:100%;}
+.grid-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:400;}
+.map-search{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--font-m);font-size:11px;padding:5px 10px;outline:none;width:220px;}
+.map-search:focus{border-color:var(--accent);}
+.map-search-btn{background:var(--accent);border:none;color:var(--bg);font-family:var(--font-h);font-size:11px;font-weight:700;padding:5px 12px;cursor:pointer;letter-spacing:1px;}
+.map-search-btn:hover{background:#33ddff;}
+.grid-info{font-family:var(--font-m);font-size:9px;color:var(--green);}
+
 .inter-view{padding:14px;display:flex;flex-direction:column;gap:12px;}
 .inter-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;}
 .stat-card{background:var(--panel);border:1px solid var(--border);padding:10px 12px;}
@@ -206,6 +196,9 @@ select.fi{cursor:pointer;}
 ::-webkit-scrollbar{width:3px;height:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);}
+.leaflet-container{background:#0a0e14;}
+.leaflet-popup-content-wrapper{background:#0f1923;border:1px solid #1a2d3f;border-radius:0;color:#c8dae8;box-shadow:0 4px 20px rgba(0,0,0,0.5);}
+.leaflet-popup-tip{background:#0f1923;}
 @media(max-width:600px){.nav-tabs{width:44px;}.nav-tab{width:36px;height:36px;font-size:16px;}.echos-grid{grid-template-columns:1fr;}.doc-bar{display:none;}.header-right .clock{display:none;}}
 </style>
 </head>
@@ -230,27 +223,38 @@ select.fi{cursor:pointer;}
 <div class="main">
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showView('echos',this)" title="Équipes">👥</button>
-    <button class="nav-tab" onclick="showView('grille',this)" title="Quadrillage">🗺️</button>
+    <button class="nav-tab" onclick="showView('grille',this)" title="Carte & Quadrillage">🗺️</button>
     <button class="nav-tab" onclick="showView('interventions',this)" title="Interventions">🚨<span class="badge" id="badge-inter" style="display:none">0</span></button>
     <button class="nav-tab" onclick="showView('maincourante',this)" title="Main courante">📋</button>
     <button class="nav-tab" onclick="showView('ressources',this)" title="Ressources">🏥</button>
     <button class="nav-tab" onclick="showView('config',this)" title="Configuration">⚙️</button>
   </div>
   <div class="content">
+
+    <!-- ECHOS -->
     <div class="view-panel active" id="view-echos"><div class="echos-grid" id="echos-grid"></div></div>
+
+    <!-- CARTE + GRILLE -->
     <div class="view-panel" id="view-grille">
-      <div class="grid-view">
-        <div class="grid-controls">
-          <span style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">COLONNES:</span>
-          <input type="number" class="fi" id="grid-cols" value="8" min="3" max="20" style="width:60px" oninput="renderGrid()">
+      <div class="map-grid-view">
+        <div class="map-grid-controls">
+          <span style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">RECHERCHER:</span>
+          <input class="map-search" id="map-search-input" placeholder="Adresse, ville, lieu…" onkeydown="if(event.key==='Enter')searchLocation()">
+          <button class="map-search-btn" onclick="searchLocation()">🔍 GO</button>
+          <span style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">COLS:</span>
+          <input type="number" class="fi" id="grid-cols" value="8" min="2" max="26" style="width:55px" oninput="drawGrid()">
           <span style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">LIGNES:</span>
-          <input type="number" class="fi" id="grid-rows" value="6" min="3" max="20" style="width:60px" oninput="renderGrid()">
-          <span style="font-family:var(--font-m);font-size:9px;color:var(--text-dim)">| CLIC = poste de soins</span>
-          <span style="font-family:var(--font-m);font-size:9px;color:var(--green)">🟢 POSTE: <span id="poste-label">NON DÉFINI</span></span>
+          <input type="number" class="fi" id="grid-rows" value="6" min="2" max="20" style="width:55px" oninput="drawGrid()">
+          <span class="grid-info">🏕️ POSTE: <span id="poste-label">NON DÉFINI</span></span>
+          <button class="hbtn" onclick="fitGrid()" style="font-size:10px">⛶ AJUSTER</button>
         </div>
-        <div class="grid-wrap" id="grid-wrap"></div>
+        <div class="map-container">
+          <div id="terrain-map"></div>
+        </div>
       </div>
     </div>
+
+    <!-- INTERVENTIONS -->
     <div class="view-panel" id="view-interventions">
       <div class="inter-view">
         <div class="inter-stats">
@@ -263,6 +267,8 @@ select.fi{cursor:pointer;}
         <div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim);text-align:center;padding:20px" id="inter-empty">Aucune intervention</div>
       </div>
     </div>
+
+    <!-- MAIN COURANTE -->
     <div class="view-panel" id="view-maincourante">
       <div class="mc-view">
         <div style="display:flex;justify-content:space-between;align-items:center">
@@ -273,6 +279,8 @@ select.fi{cursor:pointer;}
         <div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim);text-align:center;padding:20px" id="mc-empty">Aucun événement</div>
       </div>
     </div>
+
+    <!-- RESSOURCES -->
     <div class="view-panel" id="view-ressources">
       <div class="res-view">
         <div class="res-section">
@@ -285,6 +293,8 @@ select.fi{cursor:pointer;}
         </div>
       </div>
     </div>
+
+    <!-- CONFIG -->
     <div class="view-panel" id="view-config">
       <div class="cfg-view">
         <div class="cfg-section">
@@ -312,8 +322,8 @@ select.fi{cursor:pointer;}
           <div class="cfg-body"><div class="hop-cfg-list" id="hop-cfg-list"></div><button class="btn-add" onclick="addHopital()">+ AJOUTER UN HÔPITAL</button></div>
         </div>
         <div class="cfg-section">
-          <div class="cfg-head">Équipes Echo</div>
-          <div class="cfg-body"><div class="echo-cfg-list" id="echo-cfg-list"></div><button class="btn-add" onclick="addEcho()">+ AJOUTER UN ECHO</button></div>
+          <div class="cfg-head">Équipes</div>
+          <div class="cfg-body"><div class="echo-cfg-list" id="echo-cfg-list"></div><button class="btn-add" onclick="addEcho()">+ AJOUTER UNE ÉQUIPE</button></div>
         </div>
         <div class="cfg-section">
           <div class="cfg-head">Personnel</div>
@@ -322,15 +332,14 @@ select.fi{cursor:pointer;}
               <div class="field-row">
                 <div class="fg"><label>Prénom</label><input class="fi" id="new-prenom" placeholder="Prénom"></div>
                 <div class="fg"><label>Nom</label><input class="fi" id="new-nom" placeholder="Nom"></div>
-                <div class="fg" style="max-width:150px"><label>Fonction</label>
+                <div class="fg" style="max-width:160px"><label>Fonction</label>
                   <select class="fi" id="new-fn">
-                   <option value="SEC">🩹 Secouriste</option>
-<option value="AMB">🚑 ATNUP</option>
-<option value="A112">🚑 AMU</option>
-<option value="INF">💉 Infirmier</option>
-<option value="SIS">🏥 Infirmier SISU</option>
-<option value="MED">👨‍⚕️ Médecin</option>
-
+                    <option value="SEC">🩹 Secouriste</option>
+                    <option value="AMB">🚑 Ambulancier</option>
+                    <option value="A112">🚑 Ambulancier 112</option>
+                    <option value="INF">💉 Infirmier</option>
+                    <option value="SIS">🏥 Infirmier SISU</option>
+                    <option value="MED">👨‍⚕️ Médecin</option>
                   </select>
                 </div>
                 <div class="fg" style="max-width:80px;justify-content:flex-end"><label>&nbsp;</label>
@@ -345,6 +354,7 @@ select.fi{cursor:pointer;}
         <button class="btn-danger-cfg" onclick="clearEvent()">🗑️ EFFACER LES DONNÉES</button>
       </div>
     </div>
+
   </div>
 </div>
 <div class="statusbar">
@@ -352,6 +362,8 @@ select.fi{cursor:pointer;}
   <span id="sb-event">AUCUN ÉVÉNEMENT</span>
   <span id="sb-time">—</span>
 </div>
+
+<!-- MODAL INTERVENTION -->
 <div class="modal-bg" id="modal-inter">
   <div class="modal">
     <div class="modal-head">
@@ -359,7 +371,7 @@ select.fi{cursor:pointer;}
       <button style="background:transparent;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;cursor:pointer;font-size:14px" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="fg"><label>Équipe Echo</label><select class="fi" id="mi-echo"></select></div>
+      <div class="fg"><label>Équipe</label><select class="fi" id="mi-echo"></select></div>
       <div class="fg"><label>Localisation (ex: B3)</label><input class="fi" id="mi-loc" placeholder="Zone du quadrillage"></div>
       <div class="fg"><label>Type d'intervention</label><input class="fi" id="mi-type" placeholder="Malaise, Chute, Traumatisme…"></div>
       <div class="fg"><label>Nombre de patients</label><input class="fi" id="mi-patients" type="number" value="1" min="1"></div>
@@ -378,26 +390,129 @@ select.fi{cursor:pointer;}
     </div>
   </div>
 </div>
+
 <script>
-let S={event:{name:'',date:'',lieu:''},medecin:{nom:'',spec:'',tel:''},hopitaux:[],echos:[],personnel:[],actifs:[],statuts:{},timers:{},interventions:[],mainCourante:[],grille:{poste:null},echoGrid:{}};
+// STATE
+let S={event:{name:'',date:'',lieu:''},medecin:{nom:'',spec:'',tel:''},hopitaux:[],echos:[],personnel:[],actifs:[],statuts:{},timers:{},interventions:[],mainCourante:[],grille:{poste:null,lat:50.6,lng:3.9,zoom:15,cols:8,rows:6}};
 let cfgEchos=[],cfgPersonnel=[],cfgHopitaux=[],selectedPEC='';
+let map,gridLayer,posteMarker,echoMarkers={};
+
 const FN={SEC:'Secouriste',AMB:'Ambulancier',A112:'Ambulancier 112',INF:'Infirmier',SIS:'Infirmier SISU',MED:'Médecin'};
 const SL={dispo:'DISPONIBLE',inter:'INTERVENTION',pause:'PAUSE'};
+
 function now(){return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
 function nowFull(){return new Date().toLocaleString('fr-FR');}
 function getEchoMembers(id){return S.actifs.filter(a=>a.present&&a.echoId==id).map(a=>S.personnel.find(p=>p.id===a.persId)).filter(Boolean);}
 function logMC(type,text){S.mainCourante.unshift({type,text,time:now()});renderMC();}
 function shortEcho(n){return n.replace(/Echo\s*/i,'E');}
+
+// VIEWS
 function showView(name,el){
   document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
   if(el)el.classList.add('active');
-  if(name==='grille')renderGrid();
+  if(name==='grille'){setTimeout(()=>{if(map)map.invalidateSize();drawGrid();},100);}
   if(name==='interventions')renderInterventions();
   if(name==='ressources')renderRessources();
   if(name==='config')renderConfig();
 }
+
+// MAP
+function initMap(){
+  map=L.map('terrain-map',{center:[50.6,3.9],zoom:15,zoomControl:false});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CartoDB',subdomains:'abcd',maxZoom:20}).addTo(map);
+  L.control.zoom({position:'bottomright'}).addTo(map);
+  map.on('moveend zoomend',drawGrid);
+  drawGrid();
+}
+
+// GRID OVERLAY ON MAP
+function drawGrid(){
+  if(!map)return;
+  if(gridLayer)map.removeLayer(gridLayer);
+  
+  const cols=parseInt(document.getElementById('grid-cols').value)||8;
+  const rows=parseInt(document.getElementById('grid-rows').value)||6;
+  const letters='ABCDEFGHIJKLMNOPQRST';
+  const bounds=map.getBounds();
+  const north=bounds.getNorth();
+  const south=bounds.getSouth();
+  const west=bounds.getWest();
+  const east=bounds.getEast();
+  const latStep=(north-south)/rows;
+  const lngStep=(east-west)/cols;
+
+  const layers=[];
+
+  // Grid lines
+  for(let r=0;r<=rows;r++){
+    const lat=north-r*latStep;
+    layers.push(L.polyline([[lat,west],[lat,east]],{color:'rgba(0,212,255,0.3)',weight:1,dashArray:'4,4'}));
+  }
+  for(let c=0;c<=cols;c++){
+    const lng=west+c*lngStep;
+    layers.push(L.polyline([[north,lng],[south,lng]],{color:'rgba(0,212,255,0.3)',weight:1,dashArray:'4,4'}));
+  }
+
+  // Cell labels
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cellKey=letters[r]+(c+1);
+      const cellLat=north-r*latStep-latStep*0.15;
+      const cellLng=west+c*lngStep+lngStep*0.05;
+      const isPoste=S.grille.poste===cellKey;
+      
+      const icon=L.divIcon({
+        html:`<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:${isPoste?'#00ff88':'rgba(0,212,255,0.5)'};font-weight:700;cursor:pointer;${isPoste?'text-shadow:0 0 8px #00ff88;':''}">${cellKey}${isPoste?' 🏕️':''}</div>`,
+        className:'',
+        iconSize:[40,20],
+        iconAnchor:[0,0]
+      });
+      
+      const m=L.marker([cellLat,cellLng],{icon,interactive:true})
+        .on('click',()=>handleCellClick(cellKey));
+      layers.push(m);
+    }
+  }
+
+  gridLayer=L.layerGroup(layers).addTo(map);
+  S.grille.cols=cols;
+  S.grille.rows=rows;
+  document.getElementById('poste-label').textContent=S.grille.poste||'NON DÉFINI';
+}
+
+function handleCellClick(cellKey){
+  S.grille.poste=S.grille.poste===cellKey?null:cellKey;
+  logMC('config',S.grille.poste?`Poste de soins → ${cellKey}`:'Poste de soins supprimé');
+  drawGrid();
+  saveToFirebase();
+}
+
+function fitGrid(){
+  if(map)map.invalidateSize();
+  drawGrid();
+}
+
+// SEARCH LOCATION
+async function searchLocation(){
+  const q=document.getElementById('map-search-input').value.trim();
+  if(!q)return;
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);
+    const data=await r.json();
+    if(data.length>0){
+      const{lat,lon}=data[0];
+      map.flyTo([parseFloat(lat),parseFloat(lon)],16,{duration:1});
+      logMC('config',`Carte centrée sur: ${q}`);
+      setTimeout(drawGrid,1200);
+    }else{
+      alert('Lieu non trouvé — essaie une adresse plus précise');
+    }
+  }catch(e){console.error(e);}
+}
+
+// ECHOS
 function renderEchos(){
   const grid=document.getElementById('echos-grid');
   grid.innerHTML='';
@@ -409,7 +524,6 @@ function renderEchos(){
     const mHtml=members.map(p=>`<span class="mtag">${p.prenom} ${p.nom}<span class="fn-badge fn-${p.fn}">${p.fn}</span></span>`).join('')||'<span style="font-size:9px;color:var(--text-dim)">—</span>';
     const card=document.createElement('div');
     card.className='echo-card s-'+status;
-    card.id='echo-card-'+echo.id;
     card.innerHTML=`
       <div class="ec-head"><div class="ec-name">${echo.name}</div><div class="ec-canal">📻 ${echo.canal||'—'}</div></div>
       <div class="ec-status"><div class="sdot"></div>${SL[status]}</div>
@@ -433,6 +547,7 @@ function renderEchos(){
   const b=document.getElementById('badge-inter');
   if(ic>0){b.textContent=ic;b.style.display='flex';}else b.style.display='none';
 }
+
 function setStatus(echoId,status){
   const prev=S.statuts[echoId];
   S.statuts[echoId]=status;
@@ -441,8 +556,10 @@ function setStatus(echoId,status){
   else if(prev==='inter'&&status!=='inter'){delete S.timers[echoId];}
   if(status==='dispo'&&prev!=='dispo')logMC('dispo',`${echo.name} → DISPONIBLE`);
   if(status==='pause')logMC('pause',`${echo.name} → PAUSE`);
-  renderEchos();renderGrid();
+  renderEchos();
+  saveToFirebase();
 }
+
 function updateTimers(){
   Object.keys(S.timers).forEach(id=>{
     const e=Math.floor((Date.now()-S.timers[id].start)/1000);
@@ -452,37 +569,8 @@ function updateTimers(){
     if(el)el.textContent=`⏱ ${m}:${s}`;
   });
 }
-function renderGrid(){
-  const cols=parseInt(document.getElementById('grid-cols').value)||8;
-  const rows=parseInt(document.getElementById('grid-rows').value)||6;
-  const wrap=document.getElementById('grid-wrap');
-  const L='ABCDEFGHIJKLMNOPQRST';
-  let html='<table class="grid-table"><thead><tr><th></th>';
-  for(let c=1;c<=cols;c++)html+=`<th>${c}</th>`;
-  html+='</tr></thead><tbody>';
-  for(let r=0;r<rows;r++){
-    html+=`<tr><th>${L[r]}</th>`;
-    for(let c=1;c<=cols;c++){
-      const k=L[r]+c;
-      const isPoste=S.grille.poste===k;
-      const echosHere=Object.entries(S.echoGrid).filter(([,v])=>v===k).map(([k])=>k);
-      html+=`<td class="${isPoste?'poste':''}" onclick="handleGridClick('${k}')">
-        <div class="cell-label">${k}</div>
-        ${isPoste?'<div class="poste-icon">🏕️</div>':''}
-        <div class="cell-echos">${echosHere.map(eid=>{const e=S.echos.find(x=>x.id==eid);const st=S.statuts[eid]||'dispo';return e?`<div class="cell-echo-badge s-${st}">${shortEcho(e.name)}</div>`:''}).join('')}</div>
-      </td>`;
-    }
-    html+='</tr>';
-  }
-  html+='</tbody></table>';
-  wrap.innerHTML=html;
-  document.getElementById('poste-label').textContent=S.grille.poste||'NON DÉFINI';
-}
-function handleGridClick(k){
-  S.grille.poste=S.grille.poste===k?null:k;
-  logMC('config',S.grille.poste?`Poste de soins → ${k}`:'Poste de soins supprimé');
-  renderGrid();
-}
+
+// INTERVENTIONS
 function openInterModal(echoId){
   const sel=document.getElementById('mi-echo');
   sel.innerHTML=S.echos.map(e=>`<option value="${e.id}" ${e.id===echoId?'selected':''}>${e.name}</option>`).join('');
@@ -493,13 +581,16 @@ function openInterModal(echoId){
   document.getElementById('mi-hop-wrap').style.display='none';
   document.getElementById('modal-inter').classList.add('open');
 }
+
 function selectPEC(type){
   selectedPEC=type;
   document.querySelectorAll('.radio-opt').forEach(o=>o.classList.remove('sel-evac','sel-poste'));
   document.getElementById('pec-'+type).classList.add('sel-'+type);
   document.getElementById('mi-hop-wrap').style.display=type==='evac'?'block':'none';
 }
+
 function closeModal(){document.getElementById('modal-inter').classList.remove('open');}
+
 function saveIntervention(){
   const echoId=parseInt(document.getElementById('mi-echo').value);
   const echo=S.echos.find(e=>e.id===echoId);
@@ -510,7 +601,9 @@ function saveIntervention(){
   closeModal();renderInterventions();
   document.getElementById('db-total').textContent=S.interventions.length;
   document.getElementById('db-evac').textContent=S.interventions.filter(i=>i.pec==='evac').length;
+  saveToFirebase();
 }
+
 function renderInterventions(){
   const list=document.getElementById('inter-list');
   const empty=document.getElementById('inter-empty');
@@ -530,6 +623,7 @@ function renderInterventions(){
   document.getElementById('st-evac').textContent=S.interventions.filter(i=>i.pec==='evac').length;
   document.getElementById('st-patients').textContent=totalP;
 }
+
 function renderMC(){
   const list=document.getElementById('mc-list');
   const empty=document.getElementById('mc-empty');
@@ -537,12 +631,14 @@ function renderMC(){
   empty.style.display=S.mainCourante.length?'none':'block';
   S.mainCourante.forEach(e=>{const item=document.createElement('div');item.className='mc-item type-'+e.type;item.innerHTML=`<div class="mc-time">${e.time}</div><div class="mc-text">${e.text}</div>`;list.appendChild(item);});
 }
+
 function renderRessources(){
   const md=document.getElementById('medecin-display');
   md.innerHTML=S.medecin.nom?`<div class="medecin-card"><div class="medecin-avatar">👨‍⚕️</div><div class="medecin-info"><div class="medecin-name">${S.medecin.nom}</div><div class="medecin-spec">${S.medecin.spec||''}</div><div class="medecin-tel">📞 ${S.medecin.tel||'—'}</div></div></div>`:'<div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Non configuré</div>';
   const hl=document.getElementById('hopital-list');
   hl.innerHTML=S.hopitaux.length?S.hopitaux.map(h=>`<div class="hop-item"><div class="hop-icon">🏥</div><div class="hop-info"><div class="hop-name">${h.nom}</div><div class="hop-spec">${h.spec||''}</div></div><div style="text-align:right"><div class="hop-dist">📍 ${h.dist||'—'}</div><div class="hop-tel">📞 ${h.tel||'—'}</div></div></div>`).join(''):'<div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Non configuré</div>';
 }
+
 function renderConfig(){
   document.getElementById('cfg-evname').value=S.event.name;
   document.getElementById('cfg-evdate').value=S.event.date;
@@ -555,17 +651,20 @@ function renderConfig(){
   cfgHopitaux=S.hopitaux.map(h=>({...h}));
   renderEchosCfg();renderPersCfg();renderHopCfg();
 }
+
 function renderEchosCfg(){
   const list=document.getElementById('echo-cfg-list');
   list.innerHTML='';
   cfgEchos.forEach((e,idx)=>{
     const item=document.createElement('div');
     item.className='echo-cfg-item';
-    item.innerHTML=`<span style="font-family:var(--font-m);font-size:9px;color:var(--text-dim);min-width:20px">#${idx+1}</span><input value="${e.name}" placeholder="Echo ${idx+1}" oninput="cfgEchos[${idx}].name=this.value" style="flex:1"><input value="${e.canal||''}" placeholder="Canal radio" oninput="cfgEchos[${idx}].canal=this.value" style="max-width:120px"><button class="pers-del" onclick="cfgEchos.splice(${idx},1);renderEchosCfg()">✕</button>`;
+    item.innerHTML=`<span style="font-family:var(--font-m);font-size:9px;color:var(--text-dim);min-width:20px">#${idx+1}</span><input value="${e.name}" placeholder="Nom équipe" oninput="cfgEchos[${idx}].name=this.value" style="flex:1"><input value="${e.canal||''}" placeholder="Radio / Balise" oninput="cfgEchos[${idx}].canal=this.value" style="max-width:140px"><button class="pers-del" onclick="cfgEchos.splice(${idx},1);renderEchosCfg()">✕</button>`;
     list.appendChild(item);
   });
 }
+
 function addEcho(){cfgEchos.push({id:Date.now(),name:'Echo '+(cfgEchos.length+1),canal:''});renderEchosCfg();}
+
 function renderPersCfg(){
   const list=document.getElementById('pers-list-cfg');
   list.innerHTML='';
@@ -574,12 +673,14 @@ function renderPersCfg(){
     const echoOpts=cfgEchos.map(e=>`<option value="${e.id}" ${actif.echoId==e.id?'selected':''}>${e.name}</option>`).join('');
     const item=document.createElement('div');
     item.className='pers-item-cfg';
-    item.innerHTML=`<input type="checkbox" class="pers-check" ${actif.present?'checked':''} onchange="updateActif(${p.id},this.checked)"><div class="pers-info"><div class="pers-name">${p.prenom} ${p.nom}</div><div class="pers-fn-txt">${FN[p.fn]}</div></div><span class="fn-badge fn-${p.fn}">${p.fn}</span><select class="pers-echo-sel" onchange="updateEchoActif(${p.id},this.value)">${echoOpts}</select><button class="pers-del" onclick="cfgPersonnel.splice(${idx},1);renderPersCfg()">✕</button>`;
+    item.innerHTML=`<input type="checkbox" class="pers-check" ${actif.present?'checked':''} onchange="updateActif(${p.id},this.checked)"><div class="pers-info"><div class="pers-name">${p.prenom} ${p.nom}</div><div class="pers-fn-txt">${FN[p.fn]||p.fn}</div></div><span class="fn-badge fn-${p.fn}">${p.fn}</span><select class="pers-echo-sel" onchange="updateEchoActif(${p.id},this.value)">${echoOpts}</select><button class="pers-del" onclick="cfgPersonnel.splice(${idx},1);renderPersCfg()">✕</button>`;
     list.appendChild(item);
   });
 }
+
 function updateActif(persId,present){const idx=S.actifs.findIndex(a=>a.persId===persId);if(idx>=0)S.actifs[idx].present=present;else S.actifs.push({persId,echoId:S.echos[0]?.id,present});}
 function updateEchoActif(persId,echoId){const idx=S.actifs.findIndex(a=>a.persId===persId);if(idx>=0)S.actifs[idx].echoId=parseInt(echoId);else S.actifs.push({persId,echoId:parseInt(echoId),present:false});}
+
 function addPersonnel(){
   const prenom=document.getElementById('new-prenom').value.trim();
   const nom=document.getElementById('new-nom').value.trim();
@@ -590,6 +691,7 @@ function addPersonnel(){
   document.getElementById('new-nom').value='';
   renderPersCfg();
 }
+
 function renderHopCfg(){
   const list=document.getElementById('hop-cfg-list');
   list.innerHTML='';
@@ -600,7 +702,9 @@ function renderHopCfg(){
     list.appendChild(item);
   });
 }
+
 function addHopital(){cfgHopitaux.push({nom:'',spec:'',dist:'',tel:''});renderHopCfg();}
+
 function saveConfig(){
   S.event={name:document.getElementById('cfg-evname').value.trim(),date:document.getElementById('cfg-evdate').value,lieu:document.getElementById('cfg-evlieu').value.trim()};
   S.medecin={nom:document.getElementById('cfg-med-nom').value.trim(),spec:document.getElementById('cfg-med-spec').value.trim(),tel:document.getElementById('cfg-med-tel').value.trim()};
@@ -610,14 +714,42 @@ function saveConfig(){
   document.getElementById('event-badge').textContent=evLabel;
   document.getElementById('sb-event').textContent=evLabel;
   logMC('config','Configuration enregistrée — '+(S.event.name||'Événement'));
-  renderEchos();alert('✅ Configuration enregistrée !');
+  renderEchos();saveToFirebase();
+  alert('✅ Configuration enregistrée !');
 }
+
 function clearEvent(){
   if(!confirm('Effacer les données de l\'événement ?'))return;
-  S.interventions=[];S.mainCourante=[];S.echoGrid={};S.grille.poste=null;
+  S.interventions=[];S.mainCourante=[];S.grille.poste=null;
   S.echos.forEach(e=>S.statuts[e.id]='dispo');
-  logMC('config','Données effacées');renderEchos();
+  logMC('config','Données effacées');renderEchos();drawGrid();saveToFirebase();
 }
+
+// FIREBASE
+function saveToFirebase(){
+  if(!window.db)return;
+  window.db.ref('echo112/state').set({
+    event:S.event,medecin:S.medecin,hopitaux:S.hopitaux,echos:S.echos,personnel:S.personnel,
+    actifs:S.actifs,statuts:S.statuts,interventions:S.interventions,mainCourante:S.mainCourante,grille:S.grille
+  }).then(()=>console.log('✅ Sauvegardé')).catch(e=>console.error('❌',e));
+}
+
+function loadFromFirebase(){
+  if(!window.db)return;
+  window.db.ref('echo112/state').once('value',(snap)=>{
+    const data=snap.val();
+    if(!data)return;
+    Object.assign(S,data);
+    const evLabel=S.event?.name?(S.event.name+(S.event.lieu?' — '+S.event.lieu:'')).toUpperCase():'AUCUN ÉVÉNEMENT';
+    document.getElementById('event-badge').textContent=evLabel;
+    document.getElementById('sb-event').textContent=evLabel;
+    if(S.grille?.cols)document.getElementById('grid-cols').value=S.grille.cols;
+    if(S.grille?.rows)document.getElementById('grid-rows').value=S.grille.rows;
+    renderEchos();drawGrid();
+  });
+}
+
+// EXPORT PDF
 function exportPDF(){
   const evacs=S.interventions.filter(i=>i.pec==='evac').length;
   const totalPat=S.interventions.reduce((s,i)=>s+i.patients,0);
@@ -638,49 +770,18 @@ function exportPDF(){
   </body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();w.print();
 }
-function saveToFirebase(){
-  if(!window.db)return;
-  window.db.ref('echo112/state').set({
-    event:S.event,
-    medecin:S.medecin,
-    hopitaux:S.hopitaux,
-    echos:S.echos,
-    personnel:S.personnel,
-    actifs:S.actifs,
-    statuts:S.statuts,
-    interventions:S.interventions,
-    mainCourante:S.mainCourante,
-    grille:S.grille
-  }).then(()=>console.log('✅ Sauvegardé'))
-  .catch(e=>console.error('❌',e));
-}
-function loadFromFirebase(){
-  if(!window.db)return;
-  window.db.ref('echo112/state').once('value',(snap)=>{
-    const data=snap.val();
-    if(!data)return;
-    Object.assign(S,data);
-    const evLabel=S.event?.name?(S.event.name+(S.event.lieu?' — '+S.event.lieu:'')).toUpperCase():'AUCUN ÉVÉNEMENT';
-    document.getElementById('event-badge').textContent=evLabel;
-    document.getElementById('sb-event').textContent=evLabel;
-    renderEchos();
-  });
-}
 
-
-
+// BOOT
 window.addEventListener('load',()=>{
-  S.echos=[{id:1,name:'Echo 1',canal:'Canal 3'},{id:2,name:'Echo 2',canal:'Canal 5'},{id:3,name:'Echo 3',canal:'Canal 7'}];
-  S.personnel=[{id:1,prenom:'Martin',nom:'Dupont',fn:'AMB'},{id:2,prenom:'Sophie',nom:'Bernard',fn:'SEC'},{id:3,prenom:'Karim',nom:'Lefebvre',fn:'INF'}];
-  S.actifs=[{persId:1,echoId:1,present:true},{persId:2,echoId:2,present:true},{persId:3,echoId:3,present:true}];
-  S.statuts={1:'dispo',2:'dispo',3:'dispo'};
-  S.medecin={nom:'Dr. Sophie Martin',spec:'Urgentiste',tel:'06 12 34 56 78'};
-  S.hopitaux=[{nom:'CHU Pellegrin',spec:'Urgences',dist:'4.2 km',tel:'05 56 79 56 79'}];
-  logMC('config','Système ECHO 112 initialisé');
-  renderEchos();
+  initMap();
   loadFromFirebase();
-setInterval(saveToFirebase, 30000);
-  setInterval(()=>{const t=new Date().toLocaleTimeString('fr-FR');document.getElementById('clock').textContent=t;document.getElementById('sb-time').textContent=t;updateTimers();},1000);
+  setInterval(()=>{
+    const t=new Date().toLocaleTimeString('fr-FR');
+    document.getElementById('clock').textContent=t;
+    document.getElementById('sb-time').textContent=t;
+    updateTimers();
+  },1000);
+  setInterval(saveToFirebase,30000);
 });
 </script>
 </body>
