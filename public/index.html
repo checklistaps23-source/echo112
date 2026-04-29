@@ -324,11 +324,13 @@ select.fi{cursor:pointer;}
                 <div class="fg"><label>Nom</label><input class="fi" id="new-nom" placeholder="Nom"></div>
                 <div class="fg" style="max-width:150px"><label>Fonction</label>
                   <select class="fi" id="new-fn">
-                    <option value="AMB">🚑 Ambulancier</option>
-                    <option value="SEC">🩹 Secouriste</option>
-                    <option value="INF">💉 Infirmier</option>
-                    <option value="SIS">🏥 Infirmier SISU</option>
-                    <option value="MED">👨‍⚕️ Médecin</option>
+                   <option value="SEC">🩹 Secouriste</option>
+<option value="AMB">🚑 ATNUP</option>
+<option value="A112">🚑 AMU</option>
+<option value="INF">💉 Infirmier</option>
+<option value="SIS">🏥 Infirmier SISU</option>
+<option value="MED">👨‍⚕️ Médecin</option>
+
                   </select>
                 </div>
                 <div class="fg" style="max-width:80px;justify-content:flex-end"><label>&nbsp;</label>
@@ -379,7 +381,7 @@ select.fi{cursor:pointer;}
 <script>
 let S={event:{name:'',date:'',lieu:''},medecin:{nom:'',spec:'',tel:''},hopitaux:[],echos:[],personnel:[],actifs:[],statuts:{},timers:{},interventions:[],mainCourante:[],grille:{poste:null},echoGrid:{}};
 let cfgEchos=[],cfgPersonnel=[],cfgHopitaux=[],selectedPEC='';
-const FN={AMB:'Ambulancier',SEC:'Secouriste',INF:'Infirmier',SIS:'Infirmier SISU',MED:'Médecin'};
+const FN={SEC:'Secouriste',AMB:'Ambulancier',A112:'Ambulancier 112',INF:'Infirmier',SIS:'Infirmier SISU',MED:'Médecin'};
 const SL={dispo:'DISPONIBLE',inter:'INTERVENTION',pause:'PAUSE'};
 function now(){return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
 function nowFull(){return new Date().toLocaleString('fr-FR');}
