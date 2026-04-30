@@ -246,7 +246,7 @@ select.fi{cursor:pointer;}
           <span style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">LIGNES:</span>
           <input type="number" class="fi" id="grid-rows" value="6" min="2" max="20" style="width:55px" oninput="drawGrid()">
          
-          <button class="hbtn" onclick="fitGrid()" style="font-size:10px">⛶ AJUSTER</button>
+          <button class="hbtn" onclick="fitGrid()" style="font-size:10px">⛶ AJUSTER</button><button class="hbtn" id="btn-lock" onclick="toggleLock()" style="font-size:10px">🔓 LIBRE</button>
         </div>
         <div class="map-container">
           <div id="terrain-map"></div>
@@ -857,6 +857,30 @@ window.addEventListener('load',()=>{
   },1000);
   setInterval(saveToFirebase,30000);
 });
+
+let mapLocked=false;
+function toggleLock(){
+  mapLocked=!mapLocked;
+  const btn=document.getElementById('btn-lock');
+  if(mapLocked){
+    map.dragging.disable();
+    map.scrollWheelZoom.disable();
+    map.doubleClickZoom.disable();
+    map.touchZoom.disable();
+    btn.textContent='🔒 VERROUILLÉ';
+    btn.style.color='var(--red)';
+    btn.style.borderColor='var(--red)';
+  }else{
+    map.dragging.enable();
+    map.scrollWheelZoom.enable();
+    map.doubleClickZoom.enable();
+    map.touchZoom.enable();
+    btn.textContent='🔓 LIBRE';
+    btn.style.color='';
+    btn.style.borderColor='';
+  }
+}
+
 </script>
 </body>
 </html>
