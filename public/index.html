@@ -920,7 +920,7 @@ function printMap(){
         }}
         ${psMarkers.map(pm=>`L.marker([${pm.getLatLng().lat},${pm.getLatLng().lng}],{icon:L.divIcon({html:'<div style="display:flex;flex-direction:column;align-items:center"><div style="background:#ff2244;color:#fff;font-weight:700;font-size:12px;padding:2px 8px;border-radius:50px;border:2px solid #fff">PS</div><div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #ff2244"></div></div>',className:'',iconSize:[40,36],iconAnchor:[20,36]})}).addTo(m);`).join('')}
         ${pmaMarker?`L.marker([${pmaMarker.getLatLng().lat},${pmaMarker.getLatLng().lng}],{icon:L.divIcon({html:'<div style="display:flex;flex-direction:column;align-items:center"><div style="background:#ffcc00;color:#000;font-weight:700;font-size:12px;padding:2px 8px;border-radius:50px;border:2px solid #fff">PMA</div><div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #ffcc00"></div></div>',className:'',iconSize:[50,36],iconAnchor:[25,36]})}).addTo(m);`:''}
-        setTimeout(()=>window.print(),1500);
+        setTimeout(()=>window.print(),4000);
       },1000);
     <\/script>
     </body></html>
