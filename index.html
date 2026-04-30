@@ -246,7 +246,7 @@ select.fi{cursor:pointer;}
           <span style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">LIGNES:</span>
           <input type="number" class="fi" id="grid-rows" value="6" min="2" max="20" style="width:55px" oninput="drawGrid()">
          
-          <button class="hbtn" onclick="fitGrid()" style="font-size:10px">⛶ AJUSTER</button><button class="hbtn" id="btn-lock" onclick="toggleLock()" style="font-size:10px">🔓 LIBRE</button>
+          <button class="hbtn" onclick="fitGrid()" style="font-size:10px">⛶ AJUSTER</button><button class="hbtn" id="btn-lock" onclick="toggleLock()" style="font-size:10px">🔓 LIBRE</button><button class="hbtn" onclick="printMap()" style="font-size:10px">🖨️ IMPRIMER</button>
         </div>
         <div class="map-container">
           <div id="terrain-map"></div>
@@ -880,6 +880,54 @@ function toggleLock(){
     btn.style.borderColor='';
   }
 }
+
+function printMap(){
+  const mapEl=document.getElementById('terrain-map');
+  const canvas=document.createElement('canvas');
+  const w=mapEl.offsetWidth;
+  const h=mapEl.offsetHeight;
+  const w2=window.open('','_blank');
+  w2.document.write(`
+    <html><head>
+    <title>ECHO 112 — ${S.event.name||'Carte'}</title>
+    <style>
+      body{margin:0;padding:10px;font-family:Arial}
+      h2{font-size:14px;margin-bottom:5px}
+      p{font-size:11px;color:#666;margin-bottom:10px}
+      #map-print{width:100%;height:85vh;border:1px solid #ccc}
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
+    </head><body>
+    <h2>🚑 ECHO 112 — ${S.event.name||'Carte terrain'} ${S.event.lieu?'— '+S.event.lieu:''}</h2>
+    <p>Date: ${S.event.date||'—'} | Imprimé le: ${nowFull()}</p>
+    <div id="map-print"></div>
+    <script>
+      const m=L.map('map-print',{center:[${map.getCenter().lat},${map.getCenter().lng}],zoom:${map.getZoom()},zoomControl:false,attributionControl:false});
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd'}).addTo(m);
+      const letters='ABCDEFGHIJKLMNOPQRST';
+      const cols=${document.getElementById('grid-cols').value||8};
+      const rows=${document.getElementById('grid-rows').value||6};
+      setTimeout(()=>{
+        const b=m.getBounds();
+        const latStep=(b.getNorth()-b.getSouth())/rows;
+        const lngStep=(b.getEast()-b.getWest())/cols;
+        for(let r=0;r<=rows;r++){const lat=b.getNorth()-r*latStep;L.polyline([[lat,b.getWest()],[lat,b.getEast()]],{color:'rgba(0,100,200,0.8)',weight:1,dashArray:'4,4'}).addTo(m);}
+        for(let c=0;c<=cols;c++){const lng=b.getWest()+c*lngStep;L.polyline([[b.getNorth(),lng],[b.getSouth(),lng]],{color:'rgba(0,100,200,0.8)',weight:1,dashArray:'4,4'}).addTo(m);}
+        for(let r=0;r<rows;r++){for(let c=0;c<cols;c++){
+          const k=letters[r]+(c+1);
+          L.marker([b.getNorth()-r*latStep-latStep*0.15,b.getWest()+c*lngStep+lngStep*0.05],{icon:L.divIcon({html:'<div style="font-size:11px;font-weight:700;color:rgba(0,100,200,0.8)">'+k+'</div>',className:'',iconSize:[30,15]})}).addTo(m);
+        }}
+        ${psMarkers.map(pm=>`L.marker([${pm.getLatLng().lat},${pm.getLatLng().lng}],{icon:L.divIcon({html:'<div style="display:flex;flex-direction:column;align-items:center"><div style="background:#ff2244;color:#fff;font-weight:700;font-size:12px;padding:2px 8px;border-radius:50px;border:2px solid #fff">PS</div><div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #ff2244"></div></div>',className:'',iconSize:[40,36],iconAnchor:[20,36]})}).addTo(m);`).join('')}
+        ${pmaMarker?`L.marker([${pmaMarker.getLatLng().lat},${pmaMarker.getLatLng().lng}],{icon:L.divIcon({html:'<div style="display:flex;flex-direction:column;align-items:center"><div style="background:#ffcc00;color:#000;font-weight:700;font-size:12px;padding:2px 8px;border-radius:50px;border:2px solid #fff">PMA</div><div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #ffcc00"></div></div>',className:'',iconSize:[50,36],iconAnchor:[25,36]})}).addTo(m);`:''}
+        setTimeout(()=>window.print(),1500);
+      },1000);
+    <\/script>
+    </body></html>
+  `);
+  w2.document.close();
+}
+
 
 </script>
 </body>
