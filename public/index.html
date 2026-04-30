@@ -507,7 +507,7 @@ function showMapMenu(latlng, point){
   `;
   document.body.appendChild(mapMenuDiv);
   pendingLatLng=latlng;
-  document.addEventListener('click',()=>{if(mapMenuDiv)mapMenuDiv.remove();},{once:true});
+  setTimeout(()=>{document.addEventListener('click',()=>{if(mapMenuDiv)mapMenuDiv.remove();},{once:true});},100);
 }
 
 function makePSIcon(){
