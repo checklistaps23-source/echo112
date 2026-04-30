@@ -424,8 +424,15 @@ function initMap(){
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CartoDB',subdomains:'abcd',maxZoom:20}).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
   map.on('moveend zoomend',drawGrid);
+
+  // Clic droit → menu PS/PMA
+  map.on('contextmenu',(e)=>{
+    showMapMenu(e.latlng, e.containerPoint);
+  });
+
   drawGrid();
 }
+
 
 // GRID OVERLAY ON MAP
 function drawGrid(){
@@ -488,6 +495,78 @@ function handleCellClick(cellKey){
   drawGrid();
   saveToFirebase();
 }
+// Marqueurs PS et PMA
+let psMarkers=[];
+let pmaMarker=null;
+let mapMenuDiv=null;
+let pendingLatLng=null;
+
+function showMapMenu(latlng, point){
+  if(mapMenuDiv)mapMenuDiv.remove();
+  mapMenuDiv=document.createElement('div');
+  mapMenuDiv.style.cssText=`position:fixed;left:${point.x+60}px;top:${point.y+100}px;background:#0d1117;border:1px solid #1a2d3f;z-index:1000;font-family:'Share Tech Mono',monospace;font-size:11px;`;
+  mapMenuDiv.innerHTML=`
+    <div onclick="placePS()" style="padding:8px 16px;cursor:pointer;color:#ff2244;border-bottom:1px solid #1a2d3f;" onmouseover="this.style.background='rgba(255,34,68,0.1)'" onmouseout="this.style.background='transparent'">🔴 Placer un PS</div>
+    <div onclick="placePMA()" style="padding:8px 16px;cursor:pointer;color:#ffcc00;" onmouseover="this.style.background='rgba(255,204,0,0.1)'" onmouseout="this.style.background='transparent'">🟡 Placer le PMA</div>
+    <div onclick="mapMenuDiv.remove()" style="padding:8px 16px;cursor:pointer;color:#4a6a80;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">✕ Annuler</div>
+  `;
+  document.body.appendChild(mapMenuDiv);
+  pendingLatLng=latlng;
+  document.addEventListener('click',()=>{if(mapMenuDiv)mapMenuDiv.remove();},{once:true});
+}
+
+function makePSIcon(){
+  return L.divIcon({
+    html:`<div style="display:flex;flex-direction:column;align-items:center">
+      <div style="background:#ff2244;color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;padding:3px 8px;border-radius:50px;border:2px solid #fff;box-shadow:0 0 10px rgba(255,34,68,0.6);white-space:nowrap">PS</div>
+      <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #ff2244;margin-top:-1px"></div>
+    </div>`,
+    className:'',iconSize:[40,36],iconAnchor:[20,36]
+  });
+}
+
+function makePMAIcon(){
+  return L.divIcon({
+    html:`<div style="display:flex;flex-direction:column;align-items:center">
+      <div style="background:#ffcc00;color:#000;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;padding:3px 8px;border-radius:50px;border:2px solid #fff;box-shadow:0 0 10px rgba(255,204,0,0.6);white-space:nowrap">PMA</div>
+      <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #ffcc00;margin-top:-1px"></div>
+    </div>`,
+    className:'',iconSize:[50,36],iconAnchor:[25,36]
+  });
+}
+
+function placePS(){
+  if(!pendingLatLng)return;
+  if(mapMenuDiv)mapMenuDiv.remove();
+  const m=L.marker(pendingLatLng,{icon:makePSIcon(),draggable:true})
+    .addTo(map)
+    .bindPopup(`<div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:#ff2244">POSTE DE SOINS</div><div style="font-size:10px;color:#4a6a80;font-family:'Share Tech Mono'">${pendingLatLng.lat.toFixed(5)}, ${pendingLatLng.lng.toFixed(5)}</div><br><button onclick="removePS(${psMarkers.length})" style="background:rgba(255,34,68,0.1);border:1px solid #ff2244;color:#ff2244;font-family:'Share Tech Mono';font-size:10px;padding:3px 8px;cursor:pointer">🗑 SUPPRIMER</button>`);
+  psMarkers.push(m);
+  logMC('config',`Poste de soins placé`);
+  saveToFirebase();
+}
+
+function placePMA(){
+  if(!pendingLatLng)return;
+  if(mapMenuDiv)mapMenuDiv.remove();
+  if(pmaMarker){map.removeLayer(pmaMarker);pmaMarker=null;}
+  pmaMarker=L.marker(pendingLatLng,{icon:makePMAIcon(),draggable:true})
+    .addTo(map)
+    .bindPopup(`<div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:#ffcc00">POSTE MÉDICAL AVANCÉ</div><div style="font-size:10px;color:#4a6a80;font-family:'Share Tech Mono'">${pendingLatLng.lat.toFixed(5)}, ${pendingLatLng.lng.toFixed(5)}</div><br><button onclick="removePMA()" style="background:rgba(255,204,0,0.1);border:1px solid #ffcc00;color:#ffcc00;font-family:'Share Tech Mono';font-size:10px;padding:3px 8px;cursor:pointer">🗑 SUPPRIMER</button>`);
+  logMC('config',`PMA placé`);
+  saveToFirebase();
+}
+
+function removePS(idx){
+  if(psMarkers[idx]){map.removeLayer(psMarkers[idx]);psMarkers.splice(idx,1);}
+  saveToFirebase();
+}
+
+function removePMA(){
+  if(pmaMarker){map.removeLayer(pmaMarker);pmaMarker=null;}
+  saveToFirebase();
+}
+
 
 function fitGrid(){
   if(map)map.invalidateSize();
