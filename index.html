@@ -421,7 +421,7 @@ function showView(name,el){
 // MAP
 function initMap(){
   map=L.map('terrain-map',{center:[50.6,3.9],zoom:15,zoomControl:false});
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CartoDB',subdomains:'abcd',maxZoom:20}).addTo(map);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CartoDB',subdomains:'abcd',maxZoom:20}).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
   map.on('moveend zoomend',drawGrid);
 
