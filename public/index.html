@@ -245,7 +245,7 @@ select.fi{cursor:pointer;}
           <input type="number" class="fi" id="grid-cols" value="8" min="2" max="26" style="width:55px" oninput="drawGrid()">
           <span style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">LIGNES:</span>
           <input type="number" class="fi" id="grid-rows" value="6" min="2" max="20" style="width:55px" oninput="drawGrid()">
-          <span class="grid-info">🏕️ POSTE: <span id="poste-label">NON DÉFINI</span></span>
+         
           <button class="hbtn" onclick="fitGrid()" style="font-size:10px">⛶ AJUSTER</button>
         </div>
         <div class="map-container">
@@ -489,12 +489,7 @@ function drawGrid(){
   document.getElementById('poste-label').textContent=S.grille.poste||'NON DÉFINI';
 }
 
-function handleCellClick(cellKey){
-  S.grille.poste=S.grille.poste===cellKey?null:cellKey;
-  logMC('config',S.grille.poste?`Poste de soins → ${cellKey}`:'Poste de soins supprimé');
-  drawGrid();
-  saveToFirebase();
-}
+
 // Marqueurs PS et PMA
 let psMarkers=[];
 let pmaMarker=null;
