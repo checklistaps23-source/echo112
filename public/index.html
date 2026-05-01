@@ -13,14 +13,38 @@
 const firebaseConfig={apiKey:"AIzaSyBXw5aieOHSv9aQsjjtEnUa0DYvcvozv34",authDomain:"echo112.firebaseapp.com",databaseURL:"https://echo112-default-rtdb.europe-west1.firebasedatabase.app",projectId:"echo112",storageBucket:"echo112.firebasestorage.app",messagingSenderId:"552122882151",appId:"1:552122882151:web:aa7b9c194e7bce85749cc2"};
 firebase.initializeApp(firebaseConfig);
 window.db=firebase.database();
-console.log("Firebase connecté ✅");
 </script>
 <style>
 :root{--bg:#07090d;--panel:#0d1117;--panel2:#111820;--border:#1a2d3f;--accent:#00d4ff;--green:#00ff88;--red:#ff2244;--yellow:#ffcc00;--orange:#ff8800;--text:#c8dae8;--text-dim:#4a6a80;--font-h:'Rajdhani',sans-serif;--font-m:'Share Tech Mono',monospace;--font-b:'Exo 2',sans-serif;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:var(--font-b);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+.login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;}
+.login-screen.hidden{display:none;}
+.login-logo{font-family:var(--font-h);font-size:48px;font-weight:700;letter-spacing:8px;color:var(--accent);text-shadow:0 0 40px rgba(0,212,255,0.4);}
+.login-logo span{color:var(--red);}
+.login-sub{font-family:var(--font-m);font-size:11px;color:var(--text-dim);letter-spacing:4px;}
+.login-box{background:var(--panel);border:1px solid var(--border);padding:32px;display:flex;flex-direction:column;gap:16px;width:320px;}
+.login-title{font-family:var(--font-h);font-size:14px;letter-spacing:3px;color:var(--text-dim);text-align:center;}
+.login-input{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--font-m);font-size:20px;padding:12px;text-align:center;letter-spacing:8px;outline:none;width:100%;}
+.login-input:focus{border-color:var(--accent);}
+.login-btn{background:var(--accent);border:none;color:var(--bg);font-family:var(--font-h);font-size:15px;font-weight:700;letter-spacing:3px;padding:12px;cursor:pointer;width:100%;}
+.login-btn:hover{background:#33ddff;}
+.login-error{font-family:var(--font-m);font-size:10px;color:var(--red);text-align:center;display:none;}
+.event-screen{position:fixed;inset:0;background:var(--bg);z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;overflow-y:auto;padding:20px;}
+.event-screen.hidden{display:none;}
+.event-list{display:flex;flex-direction:column;gap:10px;width:100%;max-width:480px;}
+.ev-card{background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--accent);padding:16px;cursor:pointer;transition:all .15s;display:flex;justify-content:space-between;align-items:center;}
+.ev-card:hover{background:rgba(0,212,255,0.05);}
+.ev-card-name{font-family:var(--font-h);font-size:18px;font-weight:700;letter-spacing:2px;color:#fff;}
+.ev-card-date{font-family:var(--font-m);font-size:10px;color:var(--text-dim);margin-top:2px;}
+.ev-card-del{background:transparent;border:1px solid var(--border);color:var(--red);width:28px;height:28px;cursor:pointer;font-size:12px;flex-shrink:0;}
+.ev-card-del:hover{background:rgba(255,34,68,0.1);border-color:var(--red);}
+.btn-new-event{background:transparent;border:1px dashed var(--border);color:var(--text-dim);font-family:var(--font-h);font-size:13px;letter-spacing:2px;padding:14px;cursor:pointer;width:100%;max-width:480px;text-transform:uppercase;transition:all .15s;}
+.btn-new-event:hover{border-color:var(--accent);color:var(--accent);}
+.new-event-form{background:var(--panel);border:1px solid var(--border);padding:20px;width:100%;max-width:480px;display:none;flex-direction:column;gap:12px;}
+.new-event-form.open{display:flex;}
 header{background:var(--panel);border-bottom:2px solid var(--border);height:52px;display:flex;align-items:center;padding:0 14px;gap:12px;flex-shrink:0;z-index:100;}
-.logo{font-family:var(--font-h);font-size:22px;font-weight:700;letter-spacing:4px;color:var(--accent);text-shadow:0 0 20px rgba(0,212,255,0.5);white-space:nowrap;}
+.logo{font-family:var(--font-h);font-size:22px;font-weight:700;letter-spacing:4px;color:var(--accent);text-shadow:0 0 20px rgba(0,212,255,0.5);white-space:nowrap;cursor:pointer;}
 .logo span{color:var(--red);}
 .event-badge{font-family:var(--font-m);font-size:10px;color:var(--text-dim);border-left:1px solid var(--border);padding-left:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
@@ -52,7 +76,7 @@ header{background:var(--panel);border-bottom:2px solid var(--border);height:52px
 .echo-card.s-pause{border-left-color:var(--yellow);}
 @keyframes pulse-border{0%,100%{box-shadow:0 0 0 0 rgba(255,34,68,0)}50%{box-shadow:0 0 10px 2px rgba(255,34,68,0.3)}}
 .ec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.ec-name{font-family:var(--font-h);font-size:20px;font-weight:700;letter-spacing:2px;color:#fff;}
+.ec-name{font-family:var(--font-h);font-size:20px;font-weight:700;letter-spacing:2px;color:#fff;display:flex;align-items:center;gap:8px;}
 .ec-canal{font-family:var(--font-m);font-size:9px;color:var(--text-dim);}
 .ec-status{display:flex;align-items:center;gap:5px;font-family:var(--font-m);font-size:10px;letter-spacing:1px;margin-bottom:8px;}
 .sdot{width:7px;height:7px;border-radius:50%;}
@@ -82,19 +106,34 @@ header{background:var(--panel);border-bottom:2px solid var(--border);height:52px
 .btn-inter-detail{width:100%;background:rgba(255,34,68,0.1);border:1px solid var(--red);color:var(--red);font-family:var(--font-h);font-size:11px;letter-spacing:1px;padding:5px;cursor:pointer;text-transform:uppercase;transition:all .15s;display:none;}
 .s-inter .btn-inter-detail{display:block;}
 .btn-inter-detail:hover{background:rgba(255,34,68,0.2);}
-
-/* MAP GRID VIEW */
+.ps-pma-section-title{padding:10px 14px 4px;font-family:var(--font-h);font-size:11px;letter-spacing:3px;color:var(--text-dim);}
+.ps-pma-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;padding:0 14px 14px;}
+.poste-card{background:var(--panel);border:1px solid var(--border);padding:14px;}
+.poste-card.ps-card{border-left:4px solid var(--red);}
+.poste-card.pma-card{border-left:4px solid #cc9900;}
+.poste-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.poste-name{font-family:var(--font-h);font-size:18px;font-weight:700;letter-spacing:2px;}
+.poste-name.ps{color:var(--red);}
+.poste-name.pma{color:#cc9900;}
+.poste-count{font-family:var(--font-m);font-size:10px;color:var(--text-dim);}
+.prise-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;max-height:150px;overflow-y:auto;}
+.prise-item{background:var(--bg);border:1px solid var(--border);padding:6px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.prise-info{flex:1;}
+.prise-nom{font-size:11px;color:var(--text);}
+.prise-time{font-family:var(--font-m);font-size:9px;color:var(--text-dim);}
+.btn-fin-prise{background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:var(--font-m);font-size:9px;padding:3px 8px;cursor:pointer;white-space:nowrap;transition:all .15s;}
+.btn-fin-prise:hover{border-color:var(--green);color:var(--green);}
+.btn-new-prise{width:100%;background:transparent;border:1px dashed var(--border);color:var(--text-dim);font-family:var(--font-h);font-size:10px;letter-spacing:1px;padding:6px;cursor:pointer;text-transform:uppercase;transition:all .15s;}
+.btn-new-prise:hover{border-color:var(--red);color:var(--red);}
+.btn-add-ps{background:transparent;border:1px dashed var(--border);color:var(--text-dim);font-family:var(--font-h);font-size:11px;letter-spacing:2px;padding:10px;cursor:pointer;margin:0 14px 14px;width:calc(100% - 28px);text-transform:uppercase;transition:all .15s;}
+.btn-add-ps:hover{border-color:var(--red);color:var(--red);}
 .map-grid-view{flex:1;display:flex;flex-direction:column;position:relative;}
 .map-grid-controls{background:rgba(13,17,23,0.95);border-bottom:1px solid var(--border);padding:8px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;flex-shrink:0;z-index:500;}
 .map-container{flex:1;position:relative;}
 #terrain-map{width:100%;height:100%;}
-.grid-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:400;}
-.map-search{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--font-m);font-size:11px;padding:5px 10px;outline:none;width:220px;}
+.map-search{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--font-m);font-size:11px;padding:5px 10px;outline:none;width:200px;}
 .map-search:focus{border-color:var(--accent);}
-.map-search-btn{background:var(--accent);border:none;color:var(--bg);font-family:var(--font-h);font-size:11px;font-weight:700;padding:5px 12px;cursor:pointer;letter-spacing:1px;}
-.map-search-btn:hover{background:#33ddff;}
-.grid-info{font-family:var(--font-m);font-size:9px;color:var(--green);}
-
+.map-search-btn{background:var(--accent);border:none;color:var(--bg);font-family:var(--font-h);font-size:11px;font-weight:700;padding:5px 12px;cursor:pointer;}
 .inter-view{padding:14px;display:flex;flex-direction:column;gap:12px;}
 .inter-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;}
 .stat-card{background:var(--panel);border:1px solid var(--border);padding:10px 12px;}
@@ -106,28 +145,38 @@ header{background:var(--panel);border-bottom:2px solid var(--border);height:52px
 .stat-val.b{color:var(--accent);}
 .inter-list{display:flex;flex-direction:column;gap:8px;}
 .inter-item{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);padding:10px 12px;}
-.inter-item.evac{border-left-color:var(--red);}
-.inter-item.poste{border-left-color:var(--green);}
 .inter-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
 .inter-echo{font-family:var(--font-h);font-size:14px;font-weight:700;letter-spacing:2px;}
 .inter-time{font-family:var(--font-m);font-size:9px;color:var(--text-dim);}
 .inter-info{font-size:11px;color:var(--text-dim);}
-.inter-badge{font-family:var(--font-m);font-size:9px;padding:2px 7px;border-radius:2px;}
-.inter-badge.evac{background:rgba(255,34,68,0.15);color:var(--red);border:1px solid var(--red);}
-.inter-badge.poste{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid var(--green);}
-.mc-view{padding:14px;display:flex;flex-direction:column;gap:10px;}
-.mc-list{display:flex;flex-direction:column;gap:4px;flex:1;}
-.mc-item{display:flex;gap:10px;align-items:flex-start;padding:6px 10px;border-left:2px solid var(--border);}
-.mc-item.type-inter{border-left-color:var(--red);}
-.mc-item.type-dispo{border-left-color:var(--green);}
-.mc-item.type-pause{border-left-color:var(--yellow);}
-.mc-item.type-evac{border-left-color:var(--orange);}
-.mc-item.type-config{border-left-color:var(--accent);}
-.mc-time{font-family:var(--font-m);font-size:10px;color:var(--text-dim);white-space:nowrap;flex-shrink:0;}
-.mc-text{font-size:11px;color:var(--text);}
+.inter-badge{font-family:var(--font-m);font-size:9px;padding:2px 7px;border-radius:2px;border:1px solid;}
+.journal-view{padding:14px;display:flex;flex-direction:column;gap:10px;}
+.journal-table{width:100%;border-collapse:collapse;font-family:var(--font-m);font-size:11px;}
+.journal-table th{background:var(--panel2);border:1px solid var(--border);padding:7px 10px;color:var(--text-dim);font-size:9px;letter-spacing:2px;text-align:left;}
+.journal-table td{border:1px solid var(--border);padding:6px 10px;vertical-align:top;}
+.journal-table tr:nth-child(even) td{background:rgba(13,17,23,0.5);}
+.mat-view{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.mat-section{background:var(--panel);border:1px solid var(--border);}
+.mat-section-head{background:var(--panel2);border-bottom:1px solid var(--border);padding:8px 14px;font-family:var(--font-h);font-size:11px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;}
+.mat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--border);}
+.mat-item{background:var(--panel);padding:8px 12px;display:flex;align-items:center;gap:8px;}
+.mat-name{flex:1;font-size:12px;color:var(--text);}
+.mat-count{font-family:var(--font-m);font-size:16px;font-weight:700;color:var(--accent);min-width:30px;text-align:center;}
+.mat-btn{background:transparent;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.mat-btn.plus:hover{border-color:var(--green);color:var(--green);background:rgba(0,255,136,0.07);}
+.mat-btn.minus:hover{border-color:var(--red);color:var(--red);background:rgba(255,34,68,0.07);}
+.mat-remarques{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--font-m);font-size:11px;padding:8px;outline:none;width:100%;min-height:60px;resize:vertical;}
+.presence-view{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.presence-table{width:100%;border-collapse:collapse;}
+.presence-table th{background:var(--panel2);border:1px solid var(--border);padding:7px 10px;color:var(--text-dim);font-family:var(--font-m);font-size:9px;letter-spacing:2px;text-align:left;}
+.presence-table td{border:1px solid var(--border);padding:6px 10px;}
+.presence-table tr:nth-child(even) td{background:rgba(13,17,23,0.4);}
+.time-input{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--font-m);font-size:11px;padding:4px 6px;outline:none;width:70px;text-align:center;}
+.time-input:focus{border-color:var(--accent);}
+.heures-calc{font-family:var(--font-m);font-size:11px;color:var(--green);}
 .res-view{padding:14px;display:flex;flex-direction:column;gap:14px;}
 .res-section{background:var(--panel);border:1px solid var(--border);}
-.res-head{background:var(--panel2);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.res-head{background:var(--panel2);border-bottom:1px solid var(--border);padding:10px 14px;}
 .res-title{font-family:var(--font-h);font-size:12px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;}
 .res-body{padding:12px 14px;}
 .medecin-card{display:flex;align-items:center;gap:14px;}
@@ -139,7 +188,6 @@ header{background:var(--panel);border-bottom:2px solid var(--border);height:52px
 .hopital-list{display:flex;flex-direction:column;gap:8px;}
 .hop-item{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);}
 .hop-item:last-child{border-bottom:none;}
-.hop-icon{font-size:20px;flex-shrink:0;}
 .hop-info{flex:1;}
 .hop-name{font-size:13px;font-weight:600;color:#fff;}
 .hop-spec{font-family:var(--font-m);font-size:9px;color:var(--text-dim);}
@@ -162,7 +210,7 @@ select.fi{cursor:pointer;}
 .pers-name{font-size:12px;font-weight:600;}
 .pers-fn-txt{font-family:var(--font-m);font-size:9px;color:var(--text-dim);}
 .pers-echo-sel{background:var(--panel2);border:1px solid var(--border);color:var(--text);font-family:var(--font-m);font-size:10px;padding:3px 6px;outline:none;cursor:pointer;}
-.pers-del{background:transparent;border:1px solid var(--border);color:var(--red);width:22px;height:22px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.pers-del{background:transparent;border:1px solid var(--border);color:var(--red);width:22px;height:22px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .pers-del:hover{background:rgba(255,34,68,0.1);}
 .echo-cfg-list{display:flex;flex-direction:column;gap:6px;}
 .echo-cfg-item{background:var(--bg);border:1px solid var(--border);padding:8px 12px;display:flex;align-items:center;gap:10px;}
@@ -178,18 +226,42 @@ select.fi{cursor:pointer;}
 .btn-danger-cfg:hover{background:rgba(255,34,68,0.1);border-color:var(--red);}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:2000;justify-content:center;align-items:center;backdrop-filter:blur(4px);}
 .modal-bg.open{display:flex;}
-.modal{background:var(--panel);border:1px solid var(--border);width:500px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;}
+.modal{background:var(--panel);border:1px solid var(--border);width:520px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;}
+.modal.wide{width:720px;}
 .modal-head{background:var(--bg);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
 .modal-title{font-family:var(--font-h);font-size:15px;font-weight:700;letter-spacing:3px;color:var(--accent);text-transform:uppercase;}
 .modal-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
 .modal-foot{border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:8px;flex-shrink:0;background:var(--bg);}
-.btn-modal-save{flex:1;background:var(--accent);border:none;color:var(--bg);font-family:var(--font-h);font-size:13px;font-weight:700;letter-spacing:2px;padding:9px;cursor:pointer;text-transform:uppercase;transition:all .15s;}
+.btn-modal-save{flex:1;background:var(--accent);border:none;color:var(--bg);font-family:var(--font-h);font-size:13px;font-weight:700;letter-spacing:2px;padding:9px;cursor:pointer;text-transform:uppercase;}
 .btn-modal-save:hover{background:#33ddff;}
 .btn-modal-cancel{background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:var(--font-h);font-size:13px;letter-spacing:1px;padding:9px 16px;cursor:pointer;text-transform:uppercase;}
 .radio-group{display:flex;gap:6px;flex-wrap:wrap;}
 .radio-opt{background:var(--bg);border:1px solid var(--border);color:var(--text-dim);font-family:var(--font-m);font-size:10px;padding:5px 10px;cursor:pointer;transition:all .15s;}
-.radio-opt.sel-evac{border-color:var(--red);color:var(--red);background:rgba(255,34,68,0.08);}
-.radio-opt.sel-poste{border-color:var(--green);color:var(--green);background:rgba(0,255,136,0.08);}
+.sortie-btns{display:flex;gap:6px;flex-wrap:wrap;}
+.sortie-btn{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text-dim);font-family:var(--font-m);font-size:9px;padding:8px;cursor:pointer;text-align:center;transition:all .15s;min-width:100px;}
+.sortie-btn:hover{border-color:var(--accent);color:var(--accent);}
+.sortie-btn.active-aps{border-color:var(--red);color:var(--red);background:rgba(255,34,68,0.08);}
+.sortie-btn.active-112{border-color:var(--orange);color:var(--orange);background:rgba(255,136,0,0.08);}
+.sortie-btn.active-accomp{border-color:var(--yellow);color:var(--yellow);background:rgba(255,204,0,0.08);}
+.sortie-btn.active-normal{border-color:var(--green);color:var(--green);background:rgba(0,255,136,0.08);}
+.fiche-section{border:1px solid var(--border);margin-bottom:8px;}
+.fiche-section-title{background:var(--panel2);border-bottom:1px solid var(--border);padding:5px 10px;font-family:var(--font-m);font-size:9px;color:var(--text-dim);letter-spacing:2px;}
+.fiche-body{padding:10px;}
+.fiche-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.fiche-field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px;}
+.fiche-field label{font-family:var(--font-m);font-size:8px;color:var(--text-dim);letter-spacing:1px;}
+.fiche-input{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--font-m);font-size:11px;padding:5px 8px;outline:none;width:100%;}
+.fiche-input:focus{border-color:var(--accent);}
+.fiche-table{width:100%;border-collapse:collapse;font-size:10px;}
+.fiche-table th,.fiche-table td{border:1px solid var(--border);padding:4px 6px;text-align:center;}
+.fiche-table th{background:var(--panel2);color:var(--text-dim);font-family:var(--font-m);font-size:8px;}
+.fiche-table td input{background:transparent;border:none;color:var(--text);font-family:var(--font-m);font-size:10px;width:100%;outline:none;text-align:center;}
+.glasgow-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.glasgow-item{background:var(--bg);border:1px solid var(--border);padding:8px;}
+.glasgow-title{font-family:var(--font-m);font-size:8px;color:var(--text-dim);margin-bottom:6px;letter-spacing:1px;}
+.glasgow-opt{display:flex;justify-content:space-between;align-items:center;padding:3px 4px;cursor:pointer;border-radius:2px;font-size:9px;}
+.glasgow-opt:hover{background:rgba(0,212,255,0.05);}
+.glasgow-opt.selected{background:rgba(0,212,255,0.12);color:var(--accent);}
 .statusbar{height:26px;background:var(--panel);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:20px;font-family:var(--font-m);font-size:9px;color:var(--text-dim);flex-shrink:0;}
 .sb-live{display:flex;align-items:center;gap:5px;color:var(--green);}
 .sb-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 1.5s infinite;}
@@ -197,26 +269,51 @@ select.fi{cursor:pointer;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);}
 .leaflet-container{background:#0a0e14;}
-.leaflet-popup-content-wrapper{background:#0f1923;border:1px solid #1a2d3f;border-radius:0;color:#c8dae8;box-shadow:0 4px 20px rgba(0,0,0,0.5);}
+.leaflet-popup-content-wrapper{background:#0f1923;border:1px solid #1a2d3f;border-radius:0;color:#c8dae8;}
 .leaflet-popup-tip{background:#0f1923;}
-@media(max-width:600px){.nav-tabs{width:44px;}.nav-tab{width:36px;height:36px;font-size:16px;}.echos-grid{grid-template-columns:1fr;}.doc-bar{display:none;}.header-right .clock{display:none;}}
-@media print {
-  header, .doc-bar, .nav-tabs, .statusbar, .map-grid-controls { display:none !important; }
-  .main { height:100vh !important; }
-  .view-panel { display:none !important; }
-  #view-grille { display:flex !important; }
-  .map-container { height:100vh !important; }
- * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-
-}</style>
+@media(max-width:600px){.nav-tabs{width:44px;}.echos-grid{grid-template-columns:1fr;}.doc-bar{display:none;}}
+</style>
 </head>
 <body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-logo">ECHO<span>112</span></div>
+  <div class="login-sub">POSTE DE SECOURS — A.P.S.</div>
+  <div class="login-box">
+    <div class="login-title">CODE D'ACCÈS</div>
+    <input class="login-input" id="login-input" type="password" maxlength="10" placeholder="••••" onkeydown="if(event.key==='Enter')checkAppCode()">
+    <button class="login-btn" onclick="checkAppCode()">ACCÉDER</button>
+    <div class="login-error" id="login-error">CODE INCORRECT</div>
+  </div>
+</div>
+
+<!-- EVENTS -->
+<div class="event-screen hidden" id="event-screen">
+  <div class="login-logo" style="font-size:32px">ECHO<span style="color:var(--red)">112</span></div>
+  <div style="font-family:var(--font-m);font-size:11px;color:var(--text-dim);letter-spacing:3px">SÉLECTIONNER UN ÉVÉNEMENT</div>
+  <div class="event-list" id="event-list"></div>
+  <button class="btn-new-event" onclick="toggleNewEventForm()">+ CRÉER UN ÉVÉNEMENT</button>
+  <div class="new-event-form" id="new-event-form">
+    <div style="font-family:var(--font-h);font-size:12px;letter-spacing:3px;color:var(--text-dim)">NOUVEL ÉVÉNEMENT</div>
+    <div class="field-row">
+      <div class="fg"><label>Nom</label><input class="fi" id="ne-nom" placeholder="Festival, Course…"></div>
+      <div class="fg" style="max-width:140px"><label>Date</label><input class="fi" id="ne-date" type="date"></div>
+    </div>
+    <div class="field-row"><div class="fg"><label>Lieu</label><input class="fi" id="ne-lieu" placeholder="Ville, Site…"></div></div>
+    <div class="field-row"><div class="fg"><label>Code d'accès événement</label><input class="fi" id="ne-code" type="password" placeholder="Mot de passe…"></div></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-save-cfg" onclick="createEvent()">CRÉER</button>
+      <button class="btn-modal-cancel" onclick="toggleNewEventForm()">ANNULER</button>
+    </div>
+  </div>
+</div>
+
 <header>
-  <div class="logo">ECHO<span>112</span></div>
-  <div class="event-badge" id="event-badge">AUCUN ÉVÉNEMENT CONFIGURÉ</div>
+  <div class="logo" onclick="switchEvent()">ECHO<span>112</span></div>
+  <div class="event-badge" id="event-badge">AUCUN ÉVÉNEMENT</div>
   <div class="header-right">
     <div class="clock" id="clock">--:--:--</div>
-    <button class="hbtn" onclick="exportPDF()">📄 PDF</button>
     <button class="hbtn red" onclick="clearEvent()">🗑 RESET</button>
   </div>
 </header>
@@ -225,50 +322,57 @@ select.fi{cursor:pointer;}
   <div class="doc-item"><span class="doc-label">DISPO:</span><span class="doc-val green" id="db-dispo">0</span></div>
   <div class="doc-item"><span class="doc-label">INTER:</span><span class="doc-val red" id="db-inter">0</span></div>
   <div class="doc-item"><span class="doc-label">PAUSE:</span><span class="doc-val yellow" id="db-pause">0</span></div>
-  <div class="doc-item"><span class="doc-label">INTERV. TOTALES:</span><span class="doc-val" id="db-total">0</span></div>
-  <div class="doc-item"><span class="doc-label">ÉVACUATIONS:</span><span class="doc-val red" id="db-evac">0</span></div>
+  <div class="doc-item"><span class="doc-label">INTERV.:</span><span class="doc-val" id="db-total">0</span></div>
+  <div class="doc-item"><span class="doc-label">ÉVAC:</span><span class="doc-val red" id="db-evac">0</span></div>
 </div>
 <div class="main">
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showView('echos',this)" title="Équipes">👥</button>
-    <button class="nav-tab" onclick="showView('grille',this)" title="Carte & Quadrillage">🗺️</button>
+    <button class="nav-tab" onclick="showView('grille',this)" title="Carte">🗺️</button>
     <button class="nav-tab" onclick="showView('interventions',this)" title="Interventions">🚨<span class="badge" id="badge-inter" style="display:none">0</span></button>
-    <button class="nav-tab" onclick="showView('maincourante',this)" title="Main courante">📋</button>
+    <button class="nav-tab" onclick="showView('journal',this)" title="Journal">📋</button>
+    <button class="nav-tab" onclick="showView('presence',this)" title="Présence">🗒️</button>
+    <button class="nav-tab" onclick="showView('materiel',this)" title="Matériel">🧰</button>
     <button class="nav-tab" onclick="showView('ressources',this)" title="Ressources">🏥</button>
-    <button class="nav-tab" onclick="showView('config',this)" title="Configuration">⚙️</button>
+    <button class="nav-tab" onclick="showView('config',this)" title="Config">⚙️</button>
   </div>
   <div class="content">
 
-    <!-- ECHOS -->
-    <div class="view-panel active" id="view-echos"><div class="echos-grid" id="echos-grid"></div></div>
+    <div class="view-panel active" id="view-echos">
+      <div class="echos-grid" id="echos-grid"></div>
+      <div class="ps-pma-section-title">🔴 POSTES DE SOINS &amp; 🟡 PMA</div>
+      <div class="ps-pma-grid" id="ps-pma-grid"></div>
+      <button class="btn-add-ps" onclick="addPS()">+ AJOUTER UN POSTE DE SOINS</button>
+    </div>
 
-    <!-- CARTE + GRILLE -->
     <div class="view-panel" id="view-grille">
       <div class="map-grid-view">
         <div class="map-grid-controls">
-          <span style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">RECHERCHER:</span>
-          <input class="map-search" id="map-search-input" placeholder="Adresse, ville, lieu…" onkeydown="if(event.key==='Enter')searchLocation()">
-          <button class="map-search-btn" onclick="searchLocation()">🔍 GO</button>
+          <input class="map-search" id="map-search-input" placeholder="Adresse, ville…" onkeydown="if(event.key==='Enter')searchLocation()">
+          <button class="map-search-btn" onclick="searchLocation()">🔍</button>
           <span style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">COLS:</span>
-          <input type="number" class="fi" id="grid-cols" value="8" min="2" max="26" style="width:55px" oninput="drawGrid()">
+          <input type="number" class="fi" id="grid-cols" value="8" min="2" max="26" style="width:50px" oninput="drawGrid()">
           <span style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">LIGNES:</span>
-          <input type="number" class="fi" id="grid-rows" value="6" min="2" max="20" style="width:55px" oninput="drawGrid()">
-         
-          <button class="hbtn" onclick="fitGrid()" style="font-size:10px">⛶ AJUSTER</button><button class="hbtn" id="btn-lock" onclick="toggleLock()" style="font-size:10px">🔓 LIBRE</button><button class="hbtn" onclick="printMap()" style="font-size:10px">🖨️ IMPRIMER</button>
+          <input type="number" class="fi" id="grid-rows" value="6" min="2" max="20" style="width:50px" oninput="drawGrid()">
+          <button class="hbtn" onclick="fitGrid()">⛶ AJUSTER</button>
+          <button class="hbtn" id="btn-lock" onclick="toggleLock()">🔓 LIBRE</button>
+          <button class="hbtn" onclick="window.print()">🖨️ IMPRIMER</button>
         </div>
-        <div class="map-container">
-          <div id="terrain-map"></div>
-        </div>
+        <div class="map-container"><div id="terrain-map"></div></div>
       </div>
     </div>
 
-    <!-- INTERVENTIONS -->
     <div class="view-panel" id="view-interventions">
       <div class="inter-view">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-family:var(--font-h);font-size:11px;letter-spacing:3px;color:var(--text-dim)">BILAN INTERVENTIONS</div>
+          <button class="hbtn" onclick="exportInterPDF()">📄 PDF</button>
+        </div>
         <div class="inter-stats">
           <div class="stat-card"><div class="stat-label">TOTALES</div><div class="stat-val b" id="st-total">0</div></div>
           <div class="stat-card"><div class="stat-label">POSTE SOINS</div><div class="stat-val g" id="st-poste">0</div></div>
-          <div class="stat-card"><div class="stat-label">ÉVACUATIONS</div><div class="stat-val r" id="st-evac">0</div></div>
+          <div class="stat-card"><div class="stat-label">ÉVAC APS</div><div class="stat-val r" id="st-evac-aps">0</div></div>
+          <div class="stat-card"><div class="stat-label">ÉVAC 112</div><div class="stat-val r" id="st-evac-112">0</div></div>
           <div class="stat-card"><div class="stat-label">PATIENTS</div><div class="stat-val y" id="st-patients">0</div></div>
         </div>
         <div class="inter-list" id="inter-list"></div>
@@ -276,58 +380,77 @@ select.fi{cursor:pointer;}
       </div>
     </div>
 
-    <!-- MAIN COURANTE -->
-    <div class="view-panel" id="view-maincourante">
-      <div class="mc-view">
+    <div class="view-panel" id="view-journal">
+      <div class="journal-view">
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="font-family:var(--font-h);font-size:11px;letter-spacing:3px;color:var(--text-dim)">JOURNAL</div>
-          <button class="hbtn" onclick="exportPDF()">📄 EXPORT PDF</button>
+          <div style="font-family:var(--font-h);font-size:11px;letter-spacing:3px;color:var(--text-dim)">JOURNAL DE CAMPAGNE</div>
+          <div style="display:flex;gap:6px">
+            <button class="hbtn" onclick="exportJournalPDF()">📄 PDF</button>
+          </div>
         </div>
-        <div class="mc-list" id="mc-list"></div>
-        <div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim);text-align:center;padding:20px" id="mc-empty">Aucun événement</div>
+        <table class="journal-table">
+          <thead><tr><th style="width:36px">N°</th><th style="width:60px">HEURE</th><th style="width:55px">DE</th><th style="width:55px">À</th><th>INFORMATION</th><th style="width:160px">SUIVIE</th></tr></thead>
+          <tbody id="journal-body"></tbody>
+        </table>
+        <div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim);text-align:center;padding:20px" id="journal-empty">Aucun événement</div>
       </div>
     </div>
 
-    <!-- RESSOURCES -->
+    <div class="view-panel" id="view-presence">
+      <div class="presence-view">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-family:var(--font-h);font-size:11px;letter-spacing:3px;color:var(--text-dim)">FEUILLE DE PRÉSENCE</div>
+          <button class="hbtn" onclick="exportPresencePDF()">📄 PDF</button>
+        </div>
+        <table class="presence-table">
+          <thead><tr><th>NOM</th><th>PRÉNOM</th><th>FONCTION</th><th>DÉBUT</th><th>FIN</th><th>HEURES</th></tr></thead>
+          <tbody id="presence-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="view-panel" id="view-materiel">
+      <div class="mat-view">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-family:var(--font-h);font-size:11px;letter-spacing:3px;color:var(--text-dim)">MATÉRIELS UTILISÉS</div>
+          <button class="hbtn" onclick="exportMaterielPDF()">📄 PDF</button>
+        </div>
+        <div id="mat-sections"></div>
+        <div class="cfg-section">
+          <div class="cfg-head">Remarques</div>
+          <div class="cfg-body"><textarea class="mat-remarques" id="mat-remarques" placeholder="Remarques…" oninput="S.materiel.remarques=this.value;saveToFirebase()"></textarea></div>
+        </div>
+      </div>
+    </div>
+
     <div class="view-panel" id="view-ressources">
       <div class="res-view">
         <div class="res-section">
           <div class="res-head"><div class="res-title">👨‍⚕️ Médecin de permanence</div></div>
-          <div class="res-body" id="medecin-display"><div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Non configuré</div></div>
+          <div class="res-body" id="medecin-display"></div>
         </div>
         <div class="res-section">
-          <div class="res-head"><div class="res-title">🏥 Hôpitaux à proximité</div></div>
-          <div class="res-body"><div class="hopital-list" id="hopital-list"><div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Non configuré</div></div></div>
+          <div class="res-head"><div class="res-title">🏥 Hôpitaux</div></div>
+          <div class="res-body"><div class="hopital-list" id="hopital-list"></div></div>
         </div>
       </div>
     </div>
 
-    <!-- CONFIG -->
     <div class="view-panel" id="view-config">
       <div class="cfg-view">
-        <div class="cfg-section">
-          <div class="cfg-head">Événement</div>
-          <div class="cfg-body">
-            <div class="field-row">
-              <div class="fg" style="flex:2"><label>Nom</label><input class="fi" id="cfg-evname" placeholder="Festival, Course…"></div>
-              <div class="fg" style="max-width:130px"><label>Date</label><input class="fi" id="cfg-evdate" type="date"></div>
-            </div>
-            <div class="field-row"><div class="fg"><label>Lieu</label><input class="fi" id="cfg-evlieu" placeholder="Ville, Site…"></div></div>
-          </div>
-        </div>
         <div class="cfg-section">
           <div class="cfg-head">Médecin de permanence</div>
           <div class="cfg-body">
             <div class="field-row">
               <div class="fg"><label>Nom complet</label><input class="fi" id="cfg-med-nom" placeholder="Dr. Martin"></div>
-              <div class="fg" style="max-width:160px"><label>Spécialité</label><input class="fi" id="cfg-med-spec" placeholder="Urgentiste"></div>
+              <div class="fg" style="max-width:160px"><label>Spécialité</label><input class="fi" id="cfg-med-spec"></div>
             </div>
-            <div class="field-row"><div class="fg" style="max-width:160px"><label>Téléphone</label><input class="fi" id="cfg-med-tel" placeholder="06 XX XX XX XX"></div></div>
+            <div class="field-row"><div class="fg" style="max-width:200px"><label>Téléphone</label><input class="fi" id="cfg-med-tel"></div></div>
           </div>
         </div>
         <div class="cfg-section">
           <div class="cfg-head">Hôpitaux</div>
-          <div class="cfg-body"><div class="hop-cfg-list" id="hop-cfg-list"></div><button class="btn-add" onclick="addHopital()">+ AJOUTER UN HÔPITAL</button></div>
+          <div class="cfg-body"><div class="hop-cfg-list" id="hop-cfg-list"></div><button class="btn-add" onclick="addHopital()">+ AJOUTER</button></div>
         </div>
         <div class="cfg-section">
           <div class="cfg-head">Équipes</div>
@@ -346,7 +469,7 @@ select.fi{cursor:pointer;}
                     <option value="AMB">🚑 Ambulancier</option>
                     <option value="A112">🚑 Ambulancier 112</option>
                     <option value="INF">💉 Infirmier</option>
-                    <option value="SIS">🏥 Infirmier SISU</option>
+                    <option value="SIS">🏥 Inf. SISU</option>
                     <option value="MED">👨‍⚕️ Médecin</option>
                   </select>
                 </div>
@@ -359,7 +482,7 @@ select.fi{cursor:pointer;}
           </div>
         </div>
         <button class="btn-save-cfg" onclick="saveConfig()">💾 ENREGISTRER</button>
-        <button class="btn-danger-cfg" onclick="clearEvent()">🗑️ EFFACER LES DONNÉES</button>
+        <button class="btn-danger-cfg" onclick="clearEvent()">🗑️ RESET DONNÉES</button>
       </div>
     </div>
 
@@ -376,43 +499,287 @@ select.fi{cursor:pointer;}
   <div class="modal">
     <div class="modal-head">
       <div class="modal-title">🚨 FICHE INTERVENTION</div>
-      <button style="background:transparent;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;cursor:pointer;font-size:14px" onclick="closeModal()">✕</button>
+      <button style="background:transparent;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;cursor:pointer" onclick="closeModal('modal-inter')">✕</button>
     </div>
     <div class="modal-body">
       <div class="fg"><label>Équipe</label><select class="fi" id="mi-echo"></select></div>
-      <div class="fg"><label>Localisation (ex: B3)</label><input class="fi" id="mi-loc" placeholder="Zone du quadrillage"></div>
-      <div class="fg"><label>Type d'intervention</label><input class="fi" id="mi-type" placeholder="Malaise, Chute, Traumatisme…"></div>
+      <div class="fg"><label>Zone (ex: B3)</label><input class="fi" id="mi-loc" placeholder="Zone du quadrillage"></div>
+      <div class="fg"><label>Type d'intervention</label><input class="fi" id="mi-type" placeholder="Malaise, Chute…"></div>
       <div class="fg"><label>Nombre de patients</label><input class="fi" id="mi-patients" type="number" value="1" min="1"></div>
       <div class="fg"><label>Prise en charge</label>
-        <div class="radio-group">
-          <div class="radio-opt" onclick="selectPEC('poste')" id="pec-poste">🏕️ POSTE DE SOINS</div>
-          <div class="radio-opt" onclick="selectPEC('evac')" id="pec-evac">🏥 ÉVACUATION HÔPITAL</div>
+        <div class="radio-group" id="pec-group">
+          <div class="radio-opt" onclick="selectPEC(this,'poste')">🏕️ POSTE</div>
+          <div class="radio-opt" onclick="selectPEC(this,'evac-aps')">🚑 ÉVAC APS</div>
+          <div class="radio-opt" onclick="selectPEC(this,'evac-112')">🚨 ÉVAC 112</div>
+          <div class="radio-opt" onclick="selectPEC(this,'accomp')">👤 ACCOMPAGNÉE</div>
+          <div class="radio-opt" onclick="selectPEC(this,'normal')">✅ NORMALE</div>
         </div>
       </div>
-      <div class="fg" id="mi-hop-wrap" style="display:none"><label>Hôpital</label><input class="fi" id="mi-hop" placeholder="Nom de l'hôpital"></div>
+      <div class="fg" id="mi-hop-wrap" style="display:none"><label>Hôpital</label><input class="fi" id="mi-hop" placeholder="Nom hôpital"></div>
       <div class="fg"><label>Notes</label><input class="fi" id="mi-notes" placeholder="Informations…"></div>
     </div>
     <div class="modal-foot">
-      <button class="btn-modal-cancel" onclick="closeModal()">ANNULER</button>
+      <button class="btn-modal-cancel" onclick="closeModal('modal-inter')">ANNULER</button>
       <button class="btn-modal-save" onclick="saveIntervention()">ENREGISTRER</button>
     </div>
   </div>
 </div>
 
-<script>
-// STATE
-let S={event:{name:'',date:'',lieu:''},medecin:{nom:'',spec:'',tel:''},hopitaux:[],echos:[],personnel:[],actifs:[],statuts:{},timers:{},interventions:[],mainCourante:[],grille:{poste:null,lat:50.6,lng:3.9,zoom:15,cols:8,rows:6}};
-let cfgEchos=[],cfgPersonnel=[],cfgHopitaux=[],selectedPEC='';
-let map,gridLayer,posteMarker,echoMarkers={};
+<!-- MODAL NOUVELLE PRISE EN CHARGE -->
+<div class="modal-bg" id="modal-new-prise">
+  <div class="modal wide">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-new-prise-title">📋 NOUVELLE PRISE EN CHARGE</div>
+      <button style="background:transparent;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;cursor:pointer" onclick="closeModal('modal-new-prise')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fiche-section">
+        <div class="fiche-section-title">IDENTITÉ</div>
+        <div class="fiche-body">
+          <div class="fiche-row">
+            <div class="fiche-field" style="flex:2"><label>NOM</label><input class="fiche-input" id="fp-nom"></div>
+            <div class="fiche-field" style="flex:2"><label>PRÉNOM</label><input class="fiche-input" id="fp-prenom"></div>
+            <div class="fiche-field" style="max-width:70px"><label>ÂGE</label><input class="fiche-input" id="fp-age"></div>
+            <div class="fiche-field" style="max-width:80px"><label>SEXE</label><select class="fiche-input" id="fp-sexe"><option value="">—</option><option value="M">M</option><option value="F">F</option></select></div>
+          </div>
+          <div class="fiche-row">
+            <div class="fiche-field"><label>DATE DE NAISSANCE</label><input class="fiche-input" id="fp-ddn" placeholder="JJ/MM/AAAA"></div>
+            <div class="fiche-field"><label>SP / EQ / AMB / POL</label><input class="fiche-input" id="fp-origine" placeholder="SP"></div>
+          </div>
+          <div class="fiche-row"><div class="fiche-field"><label>ANAMNÈSE</label><input class="fiche-input" id="fp-anamn"></div></div>
+        </div>
+      </div>
+      <div class="fiche-section">
+        <div class="fiche-section-title">BILAN CORPOREL</div>
+        <div class="fiche-body">
+          <table class="fiche-table">
+            <thead><tr><th></th><th>Tête</th><th>Colonne</th><th>MSG</th><th>MSD</th><th>Thorax</th><th>Abdo</th><th>Bassin</th><th>MIG</th><th>MID</th></tr></thead>
+            <tbody id="bilan-body">
+              <tr><td style="color:var(--text-dim);font-size:9px;text-align:left">Plaie</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+              <tr><td style="color:var(--text-dim);font-size:9px;text-align:left">TAL</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+              <tr><td style="color:var(--text-dim);font-size:9px;text-align:left">Brûlure</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+              <tr><td style="color:var(--text-dim);font-size:9px;text-align:left">Piqûre</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+              <tr><td style="color:var(--text-dim);font-size:9px;text-align:left">Autres</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="fiche-section">
+        <div class="fiche-section-title">SCORE DE GLASGOW</div>
+        <div class="fiche-body">
+          <div class="glasgow-grid">
+            <div class="glasgow-item">
+              <div class="glasgow-title">OUVERTURE DES YEUX</div>
+              <div class="glasgow-opt" onclick="setGlasgow('yeux',4,this)"><span>Spontanée</span><span>4</span></div>
+              <div class="glasgow-opt" onclick="setGlasgow('yeux',3,this)"><span>À la demande</span><span>3</span></div>
+              <div class="glasgow-opt" onclick="setGlasgow('yeux',2,this)"><span>À la douleur</span><span>2</span></div>
+              <div class="glasgow-opt" onclick="setGlasgow('yeux',1,this)"><span>Aucune</span><span>1</span></div>
+            </div>
+            <div class="glasgow-item">
+              <div class="glasgow-title">RÉPONSE VERBALE</div>
+              <div class="glasgow-opt" onclick="setGlasgow('verbal',5,this)"><span>Orientée</span><span>5</span></div>
+              <div class="glasgow-opt" onclick="setGlasgow('verbal',4,this)"><span>Confuse</span><span>4</span></div>
+              <div class="glasgow-opt" onclick="setGlasgow('verbal',3,this)"><span>Inappropriée</span><span>3</span></div>
+              <div class="glasgow-opt" onclick="setGlasgow('verbal',2,this)"><span>Incompréhensive</span><span>2</span></div>
+              <div class="glasgow-opt" onclick="setGlasgow('verbal',1,this)"><span>Nulle</span><span>1</span></div>
+            </div>
+            <div class="glasgow-item">
+              <div class="glasgow-title">RÉPONSE MOTRICE</div>
+              <div class="glasgow-opt" onclick="setGlasgow('moteur',6,this)"><span>Obéit</span><span>6</span></div>
+              <div class="glasgow-opt" onclick="setGlasgow('moteur',5,this)"><span>Localise douleur</span><span>5</span></div>
+              <div class="glasgow-opt" onclick="setGlasgow('moteur',4,this)"><span>Retrait douleur</span><span>4</span></div>
+              <div class="glasgow-opt" onclick="setGlasgow('moteur',3,this)"><span>Flexion</span><span>3</span></div>
+              <div class="glasgow-opt" onclick="setGlasgow('moteur',2,this)"><span>Extension</span><span>2</span></div>
+              <div class="glasgow-opt" onclick="setGlasgow('moteur',1,this)"><span>Aucune</span><span>1</span></div>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:8px;font-family:var(--font-m);font-size:11px;color:var(--text-dim)">TOTAL GLASGOW : <span id="glasgow-total" style="color:var(--accent);font-size:18px;font-weight:700">—</span></div>
+        </div>
+      </div>
+      <div class="fiche-section">
+        <div class="fiche-section-title">CONSTANTES</div>
+        <div class="fiche-body">
+          <table class="fiche-table">
+            <thead><tr><th></th><th>H1</th><th>H2</th><th>H3</th><th>H4</th></tr></thead>
+            <tbody>
+              <tr><td style="text-align:left;color:var(--text-dim);font-size:9px">SpO2 (%)</td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+              <tr><td style="text-align:left;color:var(--text-dim);font-size:9px">Fréq. Card (/min)</td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+              <tr><td style="text-align:left;color:var(--text-dim);font-size:9px">Fréq. Respi (/min)</td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+              <tr><td style="text-align:left;color:var(--text-dim);font-size:9px">TA (mmHg)</td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+              <tr><td style="text-align:left;color:var(--text-dim);font-size:9px">Glycémie (mg/dl)</td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="fiche-section">
+        <div class="fiche-section-title">BILAN / SOINS</div>
+        <div class="fiche-body"><textarea class="fiche-input" id="fp-soins" rows="3" style="resize:vertical" placeholder="Soins prodigués…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-modal-cancel" onclick="closeModal('modal-new-prise')">ANNULER</button>
+      <button class="btn-modal-save" onclick="saveNewPrise()">OUVRIR PRISE EN CHARGE</button>
+    </div>
+  </div>
+</div>
 
+<!-- MODAL FIN PRISE EN CHARGE -->
+<div class="modal-bg" id="modal-fin-prise">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-fin-title">FIN PRISE EN CHARGE</div>
+      <button style="background:transparent;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;cursor:pointer" onclick="closeModal('modal-fin-prise')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label>Mode de sortie</label>
+        <div class="sortie-btns">
+          <div class="sortie-btn" onclick="selectSortie(this,'aps')" id="sb-aps">🚑 ÉVAC APS</div>
+          <div class="sortie-btn" onclick="selectSortie(this,'112')" id="sb-112">🚨 ÉVAC 112</div>
+          <div class="sortie-btn" onclick="selectSortie(this,'accomp')" id="sb-accomp">👤 ACCOMPAGNÉE</div>
+          <div class="sortie-btn" onclick="selectSortie(this,'normal')" id="sb-normal">✅ SORTIE NORMALE</div>
+        </div>
+      </div>
+      <div class="fg"><label>Heure de sortie</label><input class="fi" id="fin-heure" placeholder="HH:MM"></div>
+      <div class="fg"><label>Remarques</label><input class="fi" id="fin-notes"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-modal-cancel" onclick="closeModal('modal-fin-prise')">ANNULER</button>
+      <button class="btn-modal-save" onclick="saveFinPrise()">ENREGISTRER</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CODE EVENEMENT -->
+<div class="modal-bg" id="modal-event-pw">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-ev-pw-title">🔐 CODE ÉVÉNEMENT</div>
+      <button style="background:transparent;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;cursor:pointer" onclick="closeModal('modal-event-pw')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label>Mot de passe</label><input class="fi" id="ev-pw-input" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')checkEventCode()"></div>
+      <div style="font-family:var(--font-m);font-size:10px;color:var(--red);display:none" id="ev-pw-error">CODE INCORRECT</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-modal-cancel" onclick="closeModal('modal-event-pw')">ANNULER</button>
+      <button class="btn-modal-save" onclick="checkEventCode()">ACCÉDER</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const APP_CODE='1998';
+let currentEventId=null,pendingEventId=null;
+let S={event:{name:'',date:'',lieu:'',code:''},medecin:{nom:'',spec:'',tel:''},hopitaux:[],echos:[],personnel:[],actifs:[],statuts:{},timers:{},interventions:[],journal:[],presence:{},materiel:{counts:{},remarques:''},postes:[],prises:[],grille:{cols:8,rows:6}};
+let cfgEchos=[],cfgPersonnel=[],cfgHopitaux=[],selectedPEC='',selectedSortie='';
+let currentPosteId=null,currentPriseId=null;
+let glasgowScores={yeux:0,verbal:0,moteur:0};
+let map,gridLayer,mapLocked=false,psMarkers=[],pmaMarker=null,mapMenuDiv=null,pendingLatLng=null;
 const FN={SEC:'Secouriste',AMB:'Ambulancier',A112:'Ambulancier 112',INF:'Infirmier',SIS:'Infirmier SISU',MED:'Médecin'};
 const SL={dispo:'DISPONIBLE',inter:'INTERVENTION',pause:'PAUSE'};
+const MATERIEL_DATA=[
+  {section:'🩹 Soins',items:['Compresse 5x5','Compresse 7,5x7,5','Compresse 10x10','Compresse absor. 20x10','Sérum Physio flapule','Hibidil\'s flapule','Comp. Mélolin 10x10','Comp. Paraffine 10x10','Steri-Strip 3m/m','Steri-Strip 6m/m','Coold pack','Ouat Hémostatique']},
+  {section:'🧱 Emballage / Fixations',items:['Pansement compréssif','Pansement adésif','Bande élastique 5cm','Bande élastique 7cm','Bande élastique 10cm','Bande élastique 15cm','Bande élastique 20cm','Epingle de sureté','Tape bleu/noir (cm)','Filet doigt (cm)','Filet N°1 (cm)','Filet N°2 (cm)','Filet N°3 (cm)','Filet N°4 (cm)','Mefix 10cm','Bandage triangulaire','Couverture isothermique']},
+  {section:'💊 Crèmes / Médoc',items:['After Bite','Flamigel (cm)','Flammazine (cm)','Flexium (cm)','Voltaren (cm)','Calmiderm (cm)','Paracétamol 1gr','Nacl 500ml']},
+  {section:'🧼 Hygiène / Protec. / Divers',items:['Bassin Réniforme UU','Bt eau 33cl','Gant toilette UU']}
+];
 
 function now(){return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
 function nowFull(){return new Date().toLocaleString('fr-FR');}
-function getEchoMembers(id){return S.actifs.filter(a=>a.present&&a.echoId==id).map(a=>S.personnel.find(p=>p.id===a.persId)).filter(Boolean);}
-function logMC(type,text){S.mainCourante.unshift({type,text,time:now()});renderMC();}
-function shortEcho(n){return n.replace(/Echo\s*/i,'E');}
+function getEchoMembers(id){return(S.actifs||[]).filter(a=>a.present&&a.echoId==id).map(a=>(S.personnel||[]).find(p=>p.id===a.persId)).filter(Boolean);}
+function getEchoIcon(echoId){const m=getEchoMembers(echoId);if(m.some(x=>x.fn==='A112'||x.fn==='AMB'))return'🚑';if(m.some(x=>x.fn==='MED'))return'👨‍⚕️';if(m.some(x=>x.fn==='INF'||x.fn==='SIS'))return'💉';return'✚';}
+
+// LOGIN
+function checkAppCode(){
+  if(document.getElementById('login-input').value===APP_CODE){
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('event-screen').classList.remove('hidden');
+    loadEventList();
+  }else{
+    document.getElementById('login-error').style.display='block';
+    document.getElementById('login-input').value='';
+  }
+}
+
+function loadEventList(){
+  if(!window.db)return;
+  window.db.ref('echo112/events').once('value',(snap)=>{
+    const data=snap.val()||{};
+    const list=document.getElementById('event-list');
+    list.innerHTML='';
+    const entries=Object.entries(data);
+    if(!entries.length){list.innerHTML='<div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim);text-align:center;padding:20px">Aucun événement — créez-en un</div>';return;}
+    entries.forEach(([id,ev])=>{
+      const card=document.createElement('div');
+      card.className='ev-card';
+      card.innerHTML=`<div><div class="ev-card-name">${ev.event?.name||'Sans nom'}</div><div class="ev-card-date">${ev.event?.date||''}${ev.event?.lieu?' — '+ev.event.lieu:''}</div></div><button class="ev-card-del" onclick="deleteEvent('${id}',event)">✕</button>`;
+      card.addEventListener('click',(e)=>{if(e.target.classList.contains('ev-card-del'))return;openEventWithCode(id,ev);});
+      list.appendChild(card);
+    });
+  });
+}
+
+function openEventWithCode(id,ev){
+  pendingEventId=id;
+  const code=ev.event?.code||'';
+  if(!code){loadEvent(id);return;}
+  document.getElementById('modal-ev-pw-title').textContent='🔐 '+(ev.event?.name||'Événement');
+  document.getElementById('ev-pw-input').value='';
+  document.getElementById('ev-pw-error').style.display='none';
+  document.getElementById('modal-event-pw').classList.add('open');
+}
+
+function checkEventCode(){
+  const input=document.getElementById('ev-pw-input').value;
+  window.db.ref('echo112/events/'+pendingEventId+'/event/code').once('value',(snap)=>{
+    if(input===(snap.val()||'')){closeModal('modal-event-pw');loadEvent(pendingEventId);}
+    else{document.getElementById('ev-pw-error').style.display='block';}
+  });
+}
+
+function loadEvent(id){
+  currentEventId=id;
+  window.db.ref('echo112/events/'+id).once('value',(snap)=>{
+    const data=snap.val();
+    if(!data)return;
+    S=Object.assign({event:{name:'',date:'',lieu:'',code:''},medecin:{nom:'',spec:'',tel:''},hopitaux:[],echos:[],personnel:[],actifs:[],statuts:{},timers:{},interventions:[],journal:[],presence:{},materiel:{counts:{},remarques:''},postes:[],prises:[],grille:{cols:8,rows:6}},data);
+    const evLabel=S.event?.name?(S.event.name+(S.event.lieu?' — '+S.event.lieu:'')).toUpperCase():'AUCUN ÉVÉNEMENT';
+    document.getElementById('event-badge').textContent=evLabel;
+    document.getElementById('sb-event').textContent=evLabel;
+    if(S.grille?.cols)document.getElementById('grid-cols').value=S.grille.cols;
+    if(S.grille?.rows)document.getElementById('grid-rows').value=S.grille.rows;
+    document.getElementById('event-screen').classList.add('hidden');
+    renderEchos();renderPS();renderMateriel();renderPresence();renderJournal();
+    if(map)drawGrid();
+  });
+}
+
+function switchEvent(){
+  document.getElementById('event-screen').classList.remove('hidden');
+  loadEventList();
+}
+
+function toggleNewEventForm(){
+  document.getElementById('new-event-form').classList.toggle('open');
+}
+
+function createEvent(){
+  const nom=document.getElementById('ne-nom').value.trim();
+  if(!nom){alert('Donnez un nom à l\'événement');return;}
+  const id='ev_'+Date.now();
+  const newEv={event:{name:nom,date:document.getElementById('ne-date').value,lieu:document.getElementById('ne-lieu').value.trim(),code:document.getElementById('ne-code').value},medecin:{nom:'',spec:'',tel:''},hopitaux:[],echos:[],personnel:[],actifs:[],statuts:{},interventions:[],journal:[],presence:{},materiel:{counts:{},remarques:''},postes:[],prises:[],grille:{cols:8,rows:6}};
+  window.db.ref('echo112/events/'+id).set(newEv).then(()=>{
+    ['ne-nom','ne-date','ne-lieu','ne-code'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('new-event-form').classList.remove('open');
+    loadEventList();
+  });
+}
+
+function deleteEvent(id,e){
+  e.stopPropagation();
+  if(!confirm('Supprimer cet événement ?'))return;
+  window.db.ref('echo112/events/'+id).remove().then(()=>loadEventList());
+}
 
 // VIEWS
 function showView(name,el){
@@ -424,173 +791,88 @@ function showView(name,el){
   if(name==='interventions')renderInterventions();
   if(name==='ressources')renderRessources();
   if(name==='config')renderConfig();
+  if(name==='presence')renderPresence();
+  if(name==='journal')renderJournal();
+  if(name==='materiel')renderMateriel();
 }
 
 // MAP
 function initMap(){
-  map=L.map('terrain-map',{center:[50.6,3.9],zoom:15,zoomControl:false});
+  map=L.map('terrain-map',{center:[50.45,3.95],zoom:15,zoomControl:false});
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CartoDB',subdomains:'abcd',maxZoom:20}).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
   map.on('moveend zoomend',drawGrid);
-
-  // Clic droit → menu PS/PMA
-  map.on('contextmenu',(e)=>{
-    showMapMenu(e.latlng, e.containerPoint);
-  });
-
+  map.on('contextmenu',(e)=>showMapMenu(e.latlng,e.containerPoint));
   drawGrid();
 }
 
-
-// GRID OVERLAY ON MAP
 function drawGrid(){
   if(!map)return;
   if(gridLayer)map.removeLayer(gridLayer);
-  
   const cols=parseInt(document.getElementById('grid-cols').value)||8;
   const rows=parseInt(document.getElementById('grid-rows').value)||6;
   const letters='ABCDEFGHIJKLMNOPQRST';
-  const bounds=map.getBounds();
-  const north=bounds.getNorth();
-  const south=bounds.getSouth();
-  const west=bounds.getWest();
-  const east=bounds.getEast();
-  const latStep=(north-south)/rows;
-  const lngStep=(east-west)/cols;
-
+  const b=map.getBounds();
+  const latStep=(b.getNorth()-b.getSouth())/rows,lngStep=(b.getEast()-b.getWest())/cols;
   const layers=[];
-
-  // Grid lines
-  for(let r=0;r<=rows;r++){
-    const lat=north-r*latStep;
-    layers.push(L.polyline([[lat,west],[lat,east]],{color:'rgba(0,100,200,0.8)',weight:1,dashArray:'4,4'}));
+  for(let r=0;r<=rows;r++)layers.push(L.polyline([[b.getNorth()-r*latStep,b.getWest()],[b.getNorth()-r*latStep,b.getEast()]],{color:'rgba(0,100,200,0.8)',weight:1,dashArray:'4,4'}));
+  for(let c=0;c<=cols;c++)layers.push(L.polyline([[b.getNorth(),b.getWest()+c*lngStep],[b.getSouth(),b.getWest()+c*lngStep]],{color:'rgba(0,100,200,0.8)',weight:1,dashArray:'4,4'}));
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const icon=L.divIcon({html:`<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,100,200,1);font-weight:700">${letters[r]}${c+1}</div>`,className:'',iconSize:[40,20],iconAnchor:[0,0]});
+    layers.push(L.marker([b.getNorth()-r*latStep-latStep*0.15,b.getWest()+c*lngStep+lngStep*0.05],{icon,interactive:false}));
   }
-  for(let c=0;c<=cols;c++){
-    const lng=west+c*lngStep;
-    layers.push(L.polyline([[north,lng],[south,lng]],{color:'rgba(0,100,200,0.8)',weight:1,dashArray:'4,4'}));
-  }
-
-  // Cell labels
-  for(let r=0;r<rows;r++){
-    for(let c=0;c<cols;c++){
-      const cellKey=letters[r]+(c+1);
-      const cellLat=north-r*latStep-latStep*0.15;
-      const cellLng=west+c*lngStep+lngStep*0.05;
-      const isPoste=S.grille.poste===cellKey;
-      
-      const icon=L.divIcon({
-        html:`<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:${isPoste?'#00ff88':'rgba(0,100,200,1)'};font-weight:700;cursor:pointer;${isPoste?'text-shadow:0 0 8px #00ff88;':''}">${cellKey}${isPoste?' 🏕️':''}</div>`,
-        className:'',
-        iconSize:[40,20],
-        iconAnchor:[0,0]
-      });
-      
-      const m=L.marker([cellLat,cellLng],{icon,interactive:true})
-        .on('click',()=>handleCellClick(cellKey));
-      layers.push(m);
-    }
-  }
-
   gridLayer=L.layerGroup(layers).addTo(map);
-  S.grille.cols=cols;
-  S.grille.rows=rows;
-  
+  S.grille={cols,rows};
 }
 
+function fitGrid(){if(map)map.invalidateSize();drawGrid();}
+function toggleLock(){
+  mapLocked=!mapLocked;
+  const btn=document.getElementById('btn-lock');
+  if(mapLocked){map.dragging.disable();map.scrollWheelZoom.disable();map.doubleClickZoom.disable();map.touchZoom.disable();btn.textContent='🔒 VERROUILLÉ';btn.style.color='var(--red)';btn.style.borderColor='var(--red)';}
+  else{map.dragging.enable();map.scrollWheelZoom.enable();map.doubleClickZoom.enable();map.touchZoom.enable();btn.textContent='🔓 LIBRE';btn.style.color='';btn.style.borderColor='';}
+}
 
-// Marqueurs PS et PMA
-let psMarkers=[];
-let pmaMarker=null;
-let mapMenuDiv=null;
-let pendingLatLng=null;
-
-function showMapMenu(latlng, point){
+function showMapMenu(latlng,point){
   if(mapMenuDiv)mapMenuDiv.remove();
   mapMenuDiv=document.createElement('div');
   mapMenuDiv.style.cssText=`position:fixed;left:${point.x+60}px;top:${point.y+100}px;background:#0d1117;border:1px solid #1a2d3f;z-index:1000;font-family:'Share Tech Mono',monospace;font-size:11px;`;
-  mapMenuDiv.innerHTML=`
-    <div onclick="placePS()" style="padding:8px 16px;cursor:pointer;color:#ff2244;border-bottom:1px solid #1a2d3f;" onmouseover="this.style.background='rgba(255,34,68,0.1)'" onmouseout="this.style.background='transparent'">🔴 Placer un PS</div>
-    <div onclick="placePMA()" style="padding:8px 16px;cursor:pointer;color:#ffcc00;" onmouseover="this.style.background='rgba(255,204,0,0.1)'" onmouseout="this.style.background='transparent'">🟡 Placer le PMA</div>
-    <div onclick="mapMenuDiv.remove()" style="padding:8px 16px;cursor:pointer;color:#4a6a80;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">✕ Annuler</div>
-  `;
+  mapMenuDiv.innerHTML=`<div onclick="placePS_map()" style="padding:8px 16px;cursor:pointer;color:#ff2244;border-bottom:1px solid #1a2d3f" onmouseover="this.style.background='rgba(255,34,68,0.1)'" onmouseout="this.style.background=''">🔴 Placer un PS</div><div onclick="placePMA_map()" style="padding:8px 16px;cursor:pointer;color:#cc9900" onmouseover="this.style.background='rgba(204,153,0,0.1)'" onmouseout="this.style.background=''">🟡 Placer le PMA</div><div onclick="mapMenuDiv.remove()" style="padding:8px 16px;cursor:pointer;color:#4a6a80" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background=''">✕ Annuler</div>`;
   document.body.appendChild(mapMenuDiv);
   pendingLatLng=latlng;
   setTimeout(()=>{document.addEventListener('click',()=>{if(mapMenuDiv)mapMenuDiv.remove();},{once:true});},100);
 }
 
-function makePSIcon(){
-  return L.divIcon({
-    html:`<div style="display:flex;flex-direction:column;align-items:center">
-      <div style="background:#ff2244;color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;padding:3px 8px;border-radius:50px;border:2px solid #fff;box-shadow:0 0 10px rgba(255,34,68,0.6);white-space:nowrap">PS</div>
-      <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #ff2244;margin-top:-1px"></div>
-    </div>`,
-    className:'',iconSize:[40,36],iconAnchor:[20,36]
-  });
-}
+function makePSIcon(n){return L.divIcon({html:`<div style="display:flex;flex-direction:column;align-items:center"><div style="background:#ff2244;color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;padding:3px 8px;border-radius:50px;border:2px solid #fff;box-shadow:0 0 10px rgba(255,34,68,0.6)">PS${n}</div><div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #ff2244;margin-top:-1px"></div></div>`,className:'',iconSize:[50,36],iconAnchor:[25,36]});}
+function makePMAIcon(){return L.divIcon({html:`<div style="display:flex;flex-direction:column;align-items:center"><div style="background:#cc9900;color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;padding:3px 8px;border-radius:50px;border:2px solid #fff;box-shadow:0 0 10px rgba(204,153,0,0.6)">PMA</div><div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #cc9900;margin-top:-1px"></div></div>`,className:'',iconSize:[50,36],iconAnchor:[25,36]});}
 
-function makePMAIcon(){
-  return L.divIcon({
-    html:`<div style="display:flex;flex-direction:column;align-items:center">
-      <div style="background:#ffcc00;color:#000;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;padding:3px 8px;border-radius:50px;border:2px solid #fff;box-shadow:0 0 10px rgba(255,204,0,0.6);white-space:nowrap">PMA</div>
-      <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #ffcc00;margin-top:-1px"></div>
-    </div>`,
-    className:'',iconSize:[50,36],iconAnchor:[25,36]
-  });
-}
-
-function placePS(){
+function placePS_map(){
   if(!pendingLatLng)return;
   if(mapMenuDiv)mapMenuDiv.remove();
-  const m=L.marker(pendingLatLng,{icon:makePSIcon(),draggable:true})
-    .addTo(map)
-    .bindPopup(`<div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:#ff2244">POSTE DE SOINS</div><div style="font-size:10px;color:#4a6a80;font-family:'Share Tech Mono'">${pendingLatLng.lat.toFixed(5)}, ${pendingLatLng.lng.toFixed(5)}</div><br><button onclick="removePS(${psMarkers.length})" style="background:rgba(255,34,68,0.1);border:1px solid #ff2244;color:#ff2244;font-family:'Share Tech Mono';font-size:10px;padding:3px 8px;cursor:pointer">🗑 SUPPRIMER</button>`);
+  const n=psMarkers.length+1;
+  const m=L.marker(pendingLatLng,{icon:makePSIcon(n),draggable:true}).addTo(map);
   psMarkers.push(m);
-  logMC('config',`Poste de soins placé`);
+  logJournal(`PS${n} placé sur la carte`,'config');
   saveToFirebase();
 }
 
-function placePMA(){
+function placePMA_map(){
   if(!pendingLatLng)return;
   if(mapMenuDiv)mapMenuDiv.remove();
-  if(pmaMarker){map.removeLayer(pmaMarker);pmaMarker=null;}
-  pmaMarker=L.marker(pendingLatLng,{icon:makePMAIcon(),draggable:true})
-    .addTo(map)
-    .bindPopup(`<div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:#ffcc00">POSTE MÉDICAL AVANCÉ</div><div style="font-size:10px;color:#4a6a80;font-family:'Share Tech Mono'">${pendingLatLng.lat.toFixed(5)}, ${pendingLatLng.lng.toFixed(5)}</div><br><button onclick="removePMA()" style="background:rgba(255,204,0,0.1);border:1px solid #ffcc00;color:#ffcc00;font-family:'Share Tech Mono';font-size:10px;padding:3px 8px;cursor:pointer">🗑 SUPPRIMER</button>`);
-  logMC('config',`PMA placé`);
+  if(pmaMarker)map.removeLayer(pmaMarker);
+  pmaMarker=L.marker(pendingLatLng,{icon:makePMAIcon(),draggable:true}).addTo(map);
+  logJournal('PMA placé sur la carte','config');
   saveToFirebase();
 }
 
-function removePS(idx){
-  if(psMarkers[idx]){map.removeLayer(psMarkers[idx]);psMarkers.splice(idx,1);}
-  saveToFirebase();
-}
-
-function removePMA(){
-  if(pmaMarker){map.removeLayer(pmaMarker);pmaMarker=null;}
-  saveToFirebase();
-}
-
-
-function fitGrid(){
-  if(map)map.invalidateSize();
-  drawGrid();
-}
-
-// SEARCH LOCATION
 async function searchLocation(){
   const q=document.getElementById('map-search-input').value.trim();
   if(!q)return;
   try{
     const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);
     const data=await r.json();
-    if(data.length>0){
-      const{lat,lon}=data[0];
-      map.flyTo([parseFloat(lat),parseFloat(lon)],16,{duration:1});
-      logMC('config',`Carte centrée sur: ${q}`);
-      setTimeout(drawGrid,1200);
-    }else{
-      alert('Lieu non trouvé — essaie une adresse plus précise');
-    }
+    if(data.length){map.flyTo([parseFloat(data[0].lat),parseFloat(data[0].lon)],16,{duration:1});setTimeout(drawGrid,1200);}
+    else alert('Lieu non trouvé');
   }catch(e){console.error(e);}
 }
 
@@ -599,138 +881,314 @@ function renderEchos(){
   const grid=document.getElementById('echos-grid');
   grid.innerHTML='';
   let counts={dispo:0,inter:0,pause:0};
-  S.echos.forEach(echo=>{
-    const status=S.statuts[echo.id]||'dispo';
+  (S.echos||[]).forEach(echo=>{
+    const status=S.statuts?.[echo.id]||'dispo';
     counts[status]++;
     const members=getEchoMembers(echo.id);
+    const icon=getEchoIcon(echo.id);
     const mHtml=members.map(p=>`<span class="mtag">${p.prenom} ${p.nom}<span class="fn-badge fn-${p.fn}">${p.fn}</span></span>`).join('')||'<span style="font-size:9px;color:var(--text-dim)">—</span>';
     const card=document.createElement('div');
     card.className='echo-card s-'+status;
-    card.innerHTML=`
-      <div class="ec-head"><div class="ec-name">${echo.name}</div><div class="ec-canal">📻 ${echo.canal||'—'}</div></div>
-      <div class="ec-status"><div class="sdot"></div>${SL[status]}</div>
-      <div class="ec-members">${mHtml}</div>
-      <div class="ec-timer" id="timer-${echo.id}">⏱ 00:00</div>
-      <div class="ec-btns">
-        <button class="sbtn sbtn-dispo ${status==='dispo'?'on':''}" onclick="setStatus(${echo.id},'dispo')">✔ DISPO</button>
-        <button class="sbtn sbtn-inter ${status==='inter'?'on':''}" onclick="setStatus(${echo.id},'inter')">🔴 INTER</button>
-        <button class="sbtn sbtn-pause ${status==='pause'?'on':''}" onclick="setStatus(${echo.id},'pause')">⏸ PAUSE</button>
-      </div>
-      <button class="btn-inter-detail" onclick="openInterModal(${echo.id})">📋 FICHE INTERVENTION</button>`;
+    card.innerHTML=`<div class="ec-head"><div class="ec-name"><span>${icon}</span>${echo.name}</div><div class="ec-canal">📻 ${echo.canal||'—'}</div></div><div class="ec-status"><div class="sdot"></div>${SL[status]}</div><div class="ec-members">${mHtml}</div><div class="ec-timer" id="timer-${echo.id}">⏱ 00:00</div><div class="ec-btns"><button class="sbtn sbtn-dispo ${status==='dispo'?'on':''}" onclick="setStatus(${echo.id},'dispo')">✔ DISPO</button><button class="sbtn sbtn-inter ${status==='inter'?'on':''}" onclick="setStatus(${echo.id},'inter')">🔴 INTER</button><button class="sbtn sbtn-pause ${status==='pause'?'on':''}" onclick="setStatus(${echo.id},'pause')">⏸ PAUSE</button></div><button class="btn-inter-detail" onclick="openInterModal(${echo.id})">📋 FICHE INTERVENTION</button>`;
     grid.appendChild(card);
   });
   document.getElementById('db-dispo').textContent=counts.dispo;
   document.getElementById('db-inter').textContent=counts.inter;
   document.getElementById('db-pause').textContent=counts.pause;
-  document.getElementById('db-medecin').textContent=S.medecin.nom||'—';
-  document.getElementById('db-total').textContent=S.interventions.length;
-  document.getElementById('db-evac').textContent=S.interventions.filter(i=>i.pec==='evac').length;
-  const ic=S.echos.filter(e=>S.statuts[e.id]==='inter').length;
+  document.getElementById('db-medecin').textContent=S.medecin?.nom||'—';
+  document.getElementById('db-total').textContent=(S.interventions||[]).length;
+  document.getElementById('db-evac').textContent=(S.interventions||[]).filter(i=>i.pec&&i.pec.startsWith('evac')).length;
+  const ic=(S.echos||[]).filter(e=>S.statuts?.[e.id]==='inter').length;
   const b=document.getElementById('badge-inter');
   if(ic>0){b.textContent=ic;b.style.display='flex';}else b.style.display='none';
 }
 
 function setStatus(echoId,status){
-  const prev=S.statuts[echoId];
+  const prev=S.statuts?.[echoId];
+  if(!S.statuts)S.statuts={};
   S.statuts[echoId]=status;
-  const echo=S.echos.find(e=>e.id===echoId);
-  if(status==='inter'&&prev!=='inter'){S.timers[echoId]={start:Date.now()};logMC('inter',`${echo.name} → INTERVENTION`);}
-  else if(prev==='inter'&&status!=='inter'){delete S.timers[echoId];}
-  if(status==='dispo'&&prev!=='dispo')logMC('dispo',`${echo.name} → DISPONIBLE`);
-  if(status==='pause')logMC('pause',`${echo.name} → PAUSE`);
-  renderEchos();
-  saveToFirebase();
+  const echo=(S.echos||[]).find(e=>e.id===echoId);
+  if(!echo)return;
+  if(status==='inter'&&prev!=='inter'){if(!S.timers)S.timers={};S.timers[echoId]={start:Date.now()};logJournal(`${echo.name} — INTERVENTION`,'inter');}
+  else if(prev==='inter'&&status!=='inter'){if(S.timers)delete S.timers[echoId];}
+  if(status==='dispo'&&prev!=='dispo')logJournal(`${echo.name} — DISPONIBLE`,'dispo');
+  if(status==='pause')logJournal(`${echo.name} — PAUSE`,'pause');
+  renderEchos();saveToFirebase();
 }
 
 function updateTimers(){
-  Object.keys(S.timers).forEach(id=>{
+  Object.keys(S.timers||{}).forEach(id=>{
     const e=Math.floor((Date.now()-S.timers[id].start)/1000);
-    const m=String(Math.floor(e/60)).padStart(2,'0');
-    const s=String(e%60).padStart(2,'0');
     const el=document.getElementById('timer-'+id);
-    if(el)el.textContent=`⏱ ${m}:${s}`;
+    if(el)el.textContent=`⏱ ${String(Math.floor(e/60)).padStart(2,'0')}:${String(e%60).padStart(2,'0')}`;
   });
 }
 
-// INTERVENTIONS
+// PS / PMA
+function addPS(){
+  if(!S.postes)S.postes=[];
+  const n=S.postes.filter(p=>p.type==='ps').length+1;
+  S.postes.push({id:Date.now(),type:'ps',num:n,label:`PS${n}`});
+  logJournal(`PS${n} ouvert`,'config');
+  renderPS();saveToFirebase();
+}
+
+function ensurePMA(){
+  if(!S.postes)S.postes=[];
+  if(!S.postes.find(p=>p.type==='pma')){
+    S.postes.push({id:Date.now(),type:'pma',label:'PMA'});
+    logJournal('PMA ouvert','config');
+    renderPS();saveToFirebase();
+  }
+}
+
+function renderPS(){
+  const grid=document.getElementById('ps-pma-grid');
+  grid.innerHTML='';
+  if(!S.postes)return;
+  if(!S.postes.find(p=>p.type==='pma')){
+    const card=document.createElement('div');
+    card.className='poste-card pma-card';
+    card.innerHTML=`<div class="poste-head"><div class="poste-name pma">🟡 PMA</div><button class="hbtn" onclick="ensurePMA()" style="font-size:9px">ACTIVER</button></div><div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Cliquer pour activer le PMA</div>`;
+    grid.appendChild(card);
+  }
+  S.postes.forEach(poste=>{
+    const prises=(S.prises||[]).filter(pr=>pr.posteId===poste.id&&!pr.closed);
+    const closed=(S.prises||[]).filter(pr=>pr.posteId===poste.id&&pr.closed);
+    const card=document.createElement('div');
+    card.className=`poste-card ${poste.type}-card`;
+    const color=poste.type==='ps'?'ps':'pma';
+    const dot=poste.type==='ps'?'🔴':'🟡';
+    card.innerHTML=`<div class="poste-head"><div class="poste-name ${color}">${dot} ${poste.label}</div><span class="poste-count">${prises.length} en cours · ${closed.length} terminées</span></div><div class="prise-list" id="prise-list-${poste.id}">${prises.map(pr=>`<div class="prise-item"><div class="prise-info"><div class="prise-nom">${pr.nom||'Patient'}</div><div class="prise-time">depuis ${pr.heureDebut}</div></div><button class="btn-fin-prise" onclick="openFinPrise(${poste.id},${pr.id})">FIN ›</button></div>`).join('')}</div><button class="btn-new-prise" onclick="openNewPrise(${poste.id},'${poste.label}')">+ NOUVELLE PRISE EN CHARGE</button>`;
+    grid.appendChild(card);
+  });
+}
+
+function openNewPrise(posteId,label){
+  currentPosteId=posteId;
+  glasgowScores={yeux:0,verbal:0,moteur:0};
+  document.getElementById('modal-new-prise-title').textContent=`📋 ${label} — Nouvelle prise en charge`;
+  ['fp-nom','fp-prenom','fp-age','fp-ddn','fp-anamn','fp-soins','fp-origine'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('fp-sexe').value='';
+  document.getElementById('glasgow-total').textContent='—';
+  document.querySelectorAll('.glasgow-opt').forEach(o=>o.classList.remove('selected'));
+  document.querySelectorAll('#bilan-body input').forEach(i=>i.value='');
+  document.getElementById('modal-new-prise').classList.add('open');
+}
+
+function saveNewPrise(){
+  if(!S.prises)S.prises=[];
+  const prise={
+    id:Date.now(),posteId:currentPosteId,
+    nom:document.getElementById('fp-nom').value+' '+document.getElementById('fp-prenom').value,
+    age:document.getElementById('fp-age').value,sexe:document.getElementById('fp-sexe').value,
+    ddn:document.getElementById('fp-ddn').value,origine:document.getElementById('fp-origine').value,
+    anamn:document.getElementById('fp-anamn').value,soins:document.getElementById('fp-soins').value,
+    glasgow:Object.assign({},glasgowScores),heureDebut:now(),closed:false,sortie:'',heureFin:''
+  };
+  S.prises.push(prise);
+  const poste=(S.postes||[]).find(p=>p.id===currentPosteId);
+  logJournal(`${poste?.label||'Poste'} — Prise en charge : ${prise.nom||'Patient'}`,poste?.type==='pma'?'pma':'ps');
+  closeModal('modal-new-prise');renderPS();saveToFirebase();
+}
+
+function openFinPrise(posteId,priseId){
+  currentPosteId=posteId;currentPriseId=priseId;
+  const poste=(S.postes||[]).find(p=>p.id===posteId);
+  document.getElementById('modal-fin-title').textContent=`FIN PRISE EN CHARGE — ${poste?.label||''}`;
+  document.getElementById('fin-heure').value=now();
+  document.getElementById('fin-notes').value='';
+  selectedSortie='';
+  document.querySelectorAll('.sortie-btn').forEach(b=>b.className='sortie-btn');
+  document.getElementById('modal-fin-prise').classList.add('open');
+}
+
+function selectSortie(el,type){
+  selectedSortie=type;
+  document.querySelectorAll('.sortie-btn').forEach(b=>b.className='sortie-btn');
+  el.classList.add('active-'+type);
+}
+
+function saveFinPrise(){
+  if(!selectedSortie){alert('Choisissez un mode de sortie');return;}
+  const prise=(S.prises||[]).find(p=>p.id===currentPriseId);
+  if(!prise)return;
+  prise.closed=true;prise.sortie=selectedSortie;prise.heureFin=document.getElementById('fin-heure').value;prise.notesFin=document.getElementById('fin-notes').value;
+  const poste=(S.postes||[]).find(p=>p.id===currentPosteId);
+  const sortieLabels={aps:'Évac APS','112':'Évac 112',accomp:'Sortie accompagnée',normal:'Sortie normale'};
+  logJournal(`${poste?.label||'Poste'} — ${prise.nom||'Patient'} — ${sortieLabels[selectedSortie]||selectedSortie}`,poste?.type==='pma'?'pma':'ps',prise.heureDebut,prise.heureFin,sortieLabels[selectedSortie]);
+  closeModal('modal-fin-prise');renderPS();saveToFirebase();
+}
+
+function setGlasgow(type,val,el){
+  glasgowScores[type]=val;
+  el.closest('.glasgow-item').querySelectorAll('.glasgow-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  const total=Object.values(glasgowScores).reduce((a,b)=>a+b,0);
+  document.getElementById('glasgow-total').textContent=total>0?total:'—';
+}
+
+// JOURNAL
+function logJournal(info,type,heureDebut,heureFin,suivie){
+  if(!S.journal)S.journal=[];
+  const n=S.journal.length+1;
+  S.journal.unshift({n,heure:now(),de:heureDebut||now(),a:heureFin||'',info,type,suivie:suivie||''});
+  renderJournal();
+}
+
+function renderJournal(){
+  const body=document.getElementById('journal-body');
+  const empty=document.getElementById('journal-empty');
+  if(!body)return;
+  body.innerHTML='';
+  const items=(S.journal||[]);
+  empty.style.display=items.length?'none':'block';
+  [...items].reverse().forEach(e=>{
+    const tr=document.createElement('tr');
+    const color=e.type==='inter'?'var(--red)':e.type==='dispo'?'var(--green)':e.type==='pma'?'var(--yellow)':e.type==='ps'?'#ff8888':'var(--text-dim)';
+    tr.innerHTML=`<td style="text-align:center;color:var(--accent);font-family:var(--font-m)">${e.n}</td><td style="color:var(--yellow);font-family:var(--font-m)">${e.heure}</td><td style="color:var(--text-dim);font-family:var(--font-m)">${e.de||''}</td><td style="color:var(--text-dim);font-family:var(--font-m)">${e.a||''}</td><td style="color:${color}">${e.info}</td><td style="color:var(--green);font-family:var(--font-m)">${e.suivie||''}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+// INTERVENTIONS (Echo)
 function openInterModal(echoId){
   const sel=document.getElementById('mi-echo');
-  sel.innerHTML=S.echos.map(e=>`<option value="${e.id}" ${e.id===echoId?'selected':''}>${e.name}</option>`).join('');
+  sel.innerHTML=(S.echos||[]).map(e=>`<option value="${e.id}" ${e.id===echoId?'selected':''}>${e.name}</option>`).join('');
   ['mi-loc','mi-type','mi-notes','mi-hop'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('mi-patients').value='1';
   selectedPEC='';
-  document.querySelectorAll('.radio-opt').forEach(o=>o.classList.remove('sel-evac','sel-poste'));
+  document.querySelectorAll('#pec-group .radio-opt').forEach(o=>o.style.cssText='');
   document.getElementById('mi-hop-wrap').style.display='none';
   document.getElementById('modal-inter').classList.add('open');
 }
 
-function selectPEC(type){
+function selectPEC(el,type){
   selectedPEC=type;
-  document.querySelectorAll('.radio-opt').forEach(o=>o.classList.remove('sel-evac','sel-poste'));
-  document.getElementById('pec-'+type).classList.add('sel-'+type);
-  document.getElementById('mi-hop-wrap').style.display=type==='evac'?'block':'none';
+  document.querySelectorAll('#pec-group .radio-opt').forEach(o=>o.style.cssText='');
+  const colors={poste:'var(--green)','evac-aps':'var(--red)','evac-112':'var(--orange)',accomp:'var(--yellow)',normal:'var(--green)'};
+  el.style.borderColor=colors[type]||'var(--accent)';el.style.color=colors[type]||'var(--accent)';
+  document.getElementById('mi-hop-wrap').style.display=(type==='evac-aps'||type==='evac-112')?'block':'none';
 }
 
-function closeModal(){document.getElementById('modal-inter').classList.remove('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
 
 function saveIntervention(){
+  if(!selectedPEC){alert('Choisissez une prise en charge');return;}
   const echoId=parseInt(document.getElementById('mi-echo').value);
-  const echo=S.echos.find(e=>e.id===echoId);
-  const inter={id:Date.now(),echoId,echoName:echo?.name||'?',loc:document.getElementById('mi-loc').value||'—',type:document.getElementById('mi-type').value||'Non précisé',patients:parseInt(document.getElementById('mi-patients').value)||1,pec:selectedPEC||'poste',hop:document.getElementById('mi-hop').value||'',notes:document.getElementById('mi-notes').value||'',time:now()};
+  const echo=(S.echos||[]).find(e=>e.id===echoId);
+  if(!S.interventions)S.interventions=[];
+  const inter={id:Date.now(),echoId,echoName:echo?.name||'?',loc:document.getElementById('mi-loc').value||'—',type:document.getElementById('mi-type').value||'Non précisé',patients:parseInt(document.getElementById('mi-patients').value)||1,pec:selectedPEC,hop:document.getElementById('mi-hop').value||'',notes:document.getElementById('mi-notes').value||'',time:now()};
   S.interventions.unshift(inter);
-  const pecText=inter.pec==='evac'?`ÉVACUATION → ${inter.hop||'hôpital'}`:'POSTE DE SOINS';
-  logMC('evac',`${inter.echoName} — ${inter.type} en ${inter.loc} — ${inter.patients} patient(s) — ${pecText}`);
-  closeModal();renderInterventions();
-  document.getElementById('db-total').textContent=S.interventions.length;
-  document.getElementById('db-evac').textContent=S.interventions.filter(i=>i.pec==='evac').length;
-  saveToFirebase();
+  const pecLabels={poste:'Poste de soins','evac-aps':'Évac APS','evac-112':'Évac 112',accomp:'Accompagnée',normal:'Normale'};
+  logJournal(`${inter.echoName} — ${inter.type} zone ${inter.loc} — ${inter.patients} patient(s)`,'inter',inter.time,'',pecLabels[selectedPEC]+(inter.hop?' → '+inter.hop:''));
+  closeModal('modal-inter');renderInterventions();renderEchos();saveToFirebase();
 }
 
 function renderInterventions(){
   const list=document.getElementById('inter-list');
   const empty=document.getElementById('inter-empty');
+  if(!list)return;
   list.innerHTML='';
-  empty.style.display=S.interventions.length?'none':'block';
+  const items=S.interventions||[];
+  empty.style.display=items.length?'none':'block';
   let totalP=0;
-  S.interventions.forEach(inter=>{
+  items.forEach(inter=>{
     totalP+=inter.patients;
-    const evac=inter.pec==='evac';
     const item=document.createElement('div');
-    item.className='inter-item '+(evac?'evac':'poste');
-    item.innerHTML=`<div class="inter-head"><div class="inter-echo">${inter.echoName}</div><div style="display:flex;gap:6px;align-items:center"><span class="inter-badge ${evac?'evac':'poste'}">${evac?'🏥 ÉVAC':'🏕️ POSTE'}</span><span class="inter-time">${inter.time}</span></div></div><div class="inter-info"><strong style="color:var(--text)">${inter.type}</strong> — Zone: <strong>${inter.loc}</strong> — ${inter.patients} patient(s)${evac&&inter.hop?' — → '+inter.hop:''}${inter.notes?'<br><span style="color:var(--text-dim)">'+inter.notes+'</span>':''}</div>`;
+    item.className='inter-item';
+    const pecColors={'evac-aps':'var(--red)','evac-112':'var(--orange)',poste:'var(--green)',accomp:'var(--yellow)',normal:'var(--green)'};
+    item.style.borderLeftColor=pecColors[inter.pec]||'var(--accent)';
+    const pecLabels={poste:'🏕️ POSTE','evac-aps':'🚑 ÉVAC APS','evac-112':'🚨 ÉVAC 112',accomp:'👤 ACCOMP.',normal:'✅ NORMALE'};
+    item.innerHTML=`<div class="inter-head"><div class="inter-echo">${inter.echoName}</div><div style="display:flex;gap:6px;align-items:center"><span class="inter-badge" style="color:${pecColors[inter.pec]};border-color:${pecColors[inter.pec]}">${pecLabels[inter.pec]||inter.pec}</span><span class="inter-time">${inter.time}</span></div></div><div class="inter-info"><strong style="color:var(--text)">${inter.type}</strong> — Zone: <strong>${inter.loc}</strong> — ${inter.patients} patient(s)${inter.hop?' → '+inter.hop:''}${inter.notes?'<br><span style="color:var(--text-dim)">'+inter.notes+'</span>':''}</div>`;
     list.appendChild(item);
   });
-  document.getElementById('st-total').textContent=S.interventions.length;
-  document.getElementById('st-poste').textContent=S.interventions.filter(i=>i.pec!=='evac').length;
-  document.getElementById('st-evac').textContent=S.interventions.filter(i=>i.pec==='evac').length;
+  document.getElementById('st-total').textContent=items.length;
+  document.getElementById('st-poste').textContent=items.filter(i=>i.pec==='poste').length;
+  document.getElementById('st-evac-aps').textContent=items.filter(i=>i.pec==='evac-aps').length;
+  document.getElementById('st-evac-112').textContent=items.filter(i=>i.pec==='evac-112').length;
   document.getElementById('st-patients').textContent=totalP;
 }
 
-function renderMC(){
-  const list=document.getElementById('mc-list');
-  const empty=document.getElementById('mc-empty');
-  list.innerHTML='';
-  empty.style.display=S.mainCourante.length?'none':'block';
-  S.mainCourante.forEach(e=>{const item=document.createElement('div');item.className='mc-item type-'+e.type;item.innerHTML=`<div class="mc-time">${e.time}</div><div class="mc-text">${e.text}</div>`;list.appendChild(item);});
+// MATERIEL
+function renderMateriel(){
+  const container=document.getElementById('mat-sections');
+  if(!container)return;
+  if(!S.materiel)S.materiel={counts:{},remarques:''};
+  container.innerHTML='';
+  MATERIEL_DATA.forEach(sec=>{
+    const div=document.createElement('div');
+    div.className='mat-section';
+    div.innerHTML=`<div class="mat-section-head">${sec.section}</div><div class="mat-grid">${sec.items.map(item=>{const key=item.replace(/[^a-zA-Z0-9]/g,'_');const count=S.materiel.counts?.[key]||0;return`<div class="mat-item"><span class="mat-name">${item}</span><button class="mat-btn minus" onclick="changeMat('${key}',-1)">−</button><span class="mat-count" id="mat-${key}">${count}</span><button class="mat-btn plus" onclick="changeMat('${key}',1)">+</button></div>`;}).join('')}</div>`;
+    container.appendChild(div);
+  });
+  const rem=document.getElementById('mat-remarques');
+  if(rem)rem.value=S.materiel.remarques||'';
 }
 
+function changeMat(key,delta){
+  if(!S.materiel)S.materiel={counts:{},remarques:''};
+  if(!S.materiel.counts)S.materiel.counts={};
+  S.materiel.counts[key]=Math.max(0,(S.materiel.counts[key]||0)+delta);
+  const el=document.getElementById('mat-'+key);
+  if(el)el.textContent=S.materiel.counts[key];
+  saveToFirebase();
+}
+
+// PRESENCE
+function renderPresence(){
+  const body=document.getElementById('presence-body');
+  if(!body)return;
+  body.innerHTML='';
+  if(!S.presence)S.presence={};
+  (S.actifs||[]).filter(a=>a.present).forEach(a=>{
+    const p=(S.personnel||[]).find(x=>x.id===a.persId);
+    if(!p)return;
+    const key='p_'+p.id;
+    if(!S.presence[key])S.presence[key]={debut:'',fin:''};
+    const pr=S.presence[key];
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:var(--text)">${p.nom}</td><td style="color:var(--text)">${p.prenom}</td><td><span class="fn-badge fn-${p.fn}">${FN[p.fn]||p.fn}</span></td><td><input type="text" class="time-input" value="${pr.debut||''}" placeholder="08:00" onchange="updatePresence('${key}','debut',this.value)"></td><td><input type="text" class="time-input" value="${pr.fin||''}" placeholder="18:00" onchange="updatePresence('${key}','fin',this.value)"></td><td class="heures-calc" id="heures-${key}">${calcHeures(pr.debut,pr.fin)}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+function updatePresence(key,field,val){
+  if(!S.presence)S.presence={};
+  if(!S.presence[key])S.presence[key]={debut:'',fin:''};
+  S.presence[key][field]=val;
+  const el=document.getElementById('heures-'+key);
+  if(el)el.textContent=calcHeures(S.presence[key].debut,S.presence[key].fin);
+  saveToFirebase();
+}
+
+function calcHeures(debut,fin){
+  if(!debut||!fin)return'—';
+  try{
+    const [dh,dm]=debut.split(':').map(Number);
+    const [fh,fm]=fin.split(':').map(Number);
+    let total=(fh*60+fm)-(dh*60+dm);
+    if(total<0)total+=24*60;
+    return`${Math.floor(total/60)}h${String(total%60).padStart(2,'0')}`;
+  }catch(e){return'—';}
+}
+
+// RESSOURCES
 function renderRessources(){
   const md=document.getElementById('medecin-display');
-  md.innerHTML=S.medecin.nom?`<div class="medecin-card"><div class="medecin-avatar">👨‍⚕️</div><div class="medecin-info"><div class="medecin-name">${S.medecin.nom}</div><div class="medecin-spec">${S.medecin.spec||''}</div><div class="medecin-tel">📞 ${S.medecin.tel||'—'}</div></div></div>`:'<div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Non configuré</div>';
+  md.innerHTML=S.medecin?.nom?`<div class="medecin-card"><div class="medecin-avatar">👨‍⚕️</div><div class="medecin-info"><div class="medecin-name">${S.medecin.nom}</div><div class="medecin-spec">${S.medecin.spec||''}</div><div class="medecin-tel">📞 ${S.medecin.tel||'—'}</div></div></div>`:'<div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Non configuré</div>';
   const hl=document.getElementById('hopital-list');
-  hl.innerHTML=S.hopitaux.length?S.hopitaux.map(h=>`<div class="hop-item"><div class="hop-icon">🏥</div><div class="hop-info"><div class="hop-name">${h.nom}</div><div class="hop-spec">${h.spec||''}</div></div><div style="text-align:right"><div class="hop-dist">📍 ${h.dist||'—'}</div><div class="hop-tel">📞 ${h.tel||'—'}</div></div></div>`).join(''):'<div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Non configuré</div>';
+  hl.innerHTML=(S.hopitaux||[]).length?(S.hopitaux).map(h=>`<div class="hop-item"><div style="font-size:20px">🏥</div><div class="hop-info"><div class="hop-name">${h.nom}</div><div class="hop-spec">${h.spec||''}</div></div><div style="text-align:right"><div class="hop-dist">📍 ${h.dist||'—'}</div><div class="hop-tel">📞 ${h.tel||'—'}</div></div></div>`).join(''):'<div style="font-family:var(--font-m);font-size:10px;color:var(--text-dim)">Non configuré</div>';
 }
 
+// CONFIG
 function renderConfig(){
-  document.getElementById('cfg-evname').value=S.event.name;
-  document.getElementById('cfg-evdate').value=S.event.date;
-  document.getElementById('cfg-evlieu').value=S.event.lieu;
-  document.getElementById('cfg-med-nom').value=S.medecin.nom;
-  document.getElementById('cfg-med-spec').value=S.medecin.spec;
-  document.getElementById('cfg-med-tel').value=S.medecin.tel;
-  cfgEchos=S.echos.map(e=>({...e}));
-  cfgPersonnel=S.personnel.map(p=>({...p}));
-  cfgHopitaux=S.hopitaux.map(h=>({...h}));
+  document.getElementById('cfg-med-nom').value=S.medecin?.nom||'';
+  document.getElementById('cfg-med-spec').value=S.medecin?.spec||'';
+  document.getElementById('cfg-med-tel').value=S.medecin?.tel||'';
+  cfgEchos=(S.echos||[]).map(e=>({...e}));
+  cfgPersonnel=(S.personnel||[]).map(p=>({...p}));
+  cfgHopitaux=(S.hopitaux||[]).map(h=>({...h}));
   renderEchosCfg();renderPersCfg();renderHopCfg();
 }
 
@@ -740,7 +1198,7 @@ function renderEchosCfg(){
   cfgEchos.forEach((e,idx)=>{
     const item=document.createElement('div');
     item.className='echo-cfg-item';
-    item.innerHTML=`<span style="font-family:var(--font-m);font-size:9px;color:var(--text-dim);min-width:20px">#${idx+1}</span><input value="${e.name}" placeholder="Nom équipe" oninput="cfgEchos[${idx}].name=this.value" style="flex:1"><input value="${e.canal||''}" placeholder="Radio / Balise" oninput="cfgEchos[${idx}].canal=this.value" style="max-width:140px"><button class="pers-del" onclick="cfgEchos.splice(${idx},1);renderEchosCfg()">✕</button>`;
+    item.innerHTML=`<span style="font-family:var(--font-m);font-size:9px;color:var(--text-dim);min-width:20px">#${idx+1}</span><input value="${e.name||''}" placeholder="Nom équipe" oninput="cfgEchos[${idx}].name=this.value" style="flex:1"><input value="${e.canal||''}" placeholder="Canal radio" oninput="cfgEchos[${idx}].canal=this.value" style="max-width:130px"><button class="pers-del" onclick="cfgEchos.splice(${idx},1);renderEchosCfg()">✕</button>`;
     list.appendChild(item);
   });
 }
@@ -751,7 +1209,7 @@ function renderPersCfg(){
   const list=document.getElementById('pers-list-cfg');
   list.innerHTML='';
   cfgPersonnel.forEach((p,idx)=>{
-    const actif=S.actifs.find(a=>a.persId===p.id)||{present:false,echoId:S.echos[0]?.id};
+    const actif=(S.actifs||[]).find(a=>a.persId===p.id)||{present:false,echoId:cfgEchos[0]?.id};
     const echoOpts=cfgEchos.map(e=>`<option value="${e.id}" ${actif.echoId==e.id?'selected':''}>${e.name}</option>`).join('');
     const item=document.createElement('div');
     item.className='pers-item-cfg';
@@ -760,8 +1218,19 @@ function renderPersCfg(){
   });
 }
 
-function updateActif(persId,present){const idx=S.actifs.findIndex(a=>a.persId===persId);if(idx>=0)S.actifs[idx].present=present;else S.actifs.push({persId,echoId:S.echos[0]?.id,present});}
-function updateEchoActif(persId,echoId){const idx=S.actifs.findIndex(a=>a.persId===persId);if(idx>=0)S.actifs[idx].echoId=parseInt(echoId);else S.actifs.push({persId,echoId:parseInt(echoId),present:false});}
+function updateActif(persId,present){
+  if(!S.actifs)S.actifs=[];
+  const idx=S.actifs.findIndex(a=>a.persId===persId);
+  if(idx>=0)S.actifs[idx].present=present;
+  else S.actifs.push({persId,echoId:S.echos?.[0]?.id,present});
+}
+
+function updateEchoActif(persId,echoId){
+  if(!S.actifs)S.actifs=[];
+  const idx=S.actifs.findIndex(a=>a.persId===persId);
+  if(idx>=0)S.actifs[idx].echoId=parseInt(echoId);
+  else S.actifs.push({persId,echoId:parseInt(echoId),present:false});
+}
 
 function addPersonnel(){
   const prenom=document.getElementById('new-prenom').value.trim();
@@ -769,8 +1238,7 @@ function addPersonnel(){
   const fn=document.getElementById('new-fn').value;
   if(!prenom||!nom)return;
   cfgPersonnel.push({id:Date.now(),prenom,nom,fn});
-  document.getElementById('new-prenom').value='';
-  document.getElementById('new-nom').value='';
+  document.getElementById('new-prenom').value='';document.getElementById('new-nom').value='';
   renderPersCfg();
 }
 
@@ -788,67 +1256,137 @@ function renderHopCfg(){
 function addHopital(){cfgHopitaux.push({nom:'',spec:'',dist:'',tel:''});renderHopCfg();}
 
 function saveConfig(){
-  S.event={name:document.getElementById('cfg-evname').value.trim(),date:document.getElementById('cfg-evdate').value,lieu:document.getElementById('cfg-evlieu').value.trim()};
   S.medecin={nom:document.getElementById('cfg-med-nom').value.trim(),spec:document.getElementById('cfg-med-spec').value.trim(),tel:document.getElementById('cfg-med-tel').value.trim()};
   S.echos=[...cfgEchos];S.personnel=[...cfgPersonnel];S.hopitaux=[...cfgHopitaux];
-  S.echos.forEach(e=>{if(!S.statuts[e.id])S.statuts[e.id]='dispo';});
-  const evLabel=S.event.name?(S.event.name+(S.event.lieu?' — '+S.event.lieu:'')).toUpperCase():'AUCUN ÉVÉNEMENT';
-  document.getElementById('event-badge').textContent=evLabel;
-  document.getElementById('sb-event').textContent=evLabel;
-  logMC('config','Configuration enregistrée — '+(S.event.name||'Événement'));
-  renderEchos();saveToFirebase();
+  S.echos.forEach(e=>{if(!S.statuts)S.statuts={};if(!S.statuts[e.id])S.statuts[e.id]='dispo';});
+  logJournal('Configuration enregistrée','config');
+  renderEchos();renderPresence();saveToFirebase();
   alert('✅ Configuration enregistrée !');
 }
 
 function clearEvent(){
-  if(!confirm('Effacer les données de l\'événement ?'))return;
-  S.interventions=[];S.mainCourante=[];S.grille.poste=null;
-  S.echos.forEach(e=>S.statuts[e.id]='dispo');
-  logMC('config','Données effacées');renderEchos();drawGrid();saveToFirebase();
+  if(!confirm('Effacer les données de cet événement ?'))return;
+  S.interventions=[];S.journal=[];S.prises=[];S.postes=[];S.materiel={counts:{},remarques:''};S.presence={};
+  (S.echos||[]).forEach(e=>{if(S.statuts)S.statuts[e.id]='dispo';});
+  renderEchos();renderPS();renderMateriel();renderPresence();renderJournal();saveToFirebase();
 }
 
 // FIREBASE
 function saveToFirebase(){
-  if(!window.db)return;
-  window.db.ref('echo112/state').set({
-    event:S.event,medecin:S.medecin,hopitaux:S.hopitaux,echos:S.echos,personnel:S.personnel,
-    actifs:S.actifs,statuts:S.statuts,interventions:S.interventions,mainCourante:S.mainCourante,grille:S.grille
-  }).then(()=>console.log('✅ Sauvegardé')).catch(e=>console.error('❌',e));
+  if(!window.db||!currentEventId)return;
+  window.db.ref('echo112/events/'+currentEventId).set(S).catch(e=>console.error('Firebase erreur:',e));
 }
 
-function loadFromFirebase(){
-  if(!window.db)return;
-  window.db.ref('echo112/state').once('value',(snap)=>{
-    const data=snap.val();
-    if(!data)return;
-    Object.assign(S,data);
-    const evLabel=S.event?.name?(S.event.name+(S.event.lieu?' — '+S.event.lieu:'')).toUpperCase():'AUCUN ÉVÉNEMENT';
-    document.getElementById('event-badge').textContent=evLabel;
-    document.getElementById('sb-event').textContent=evLabel;
-    if(S.grille?.cols)document.getElementById('grid-cols').value=S.grille.cols;
-    if(S.grille?.rows)document.getElementById('grid-rows').value=S.grille.rows;
-    renderEchos();drawGrid();
+// PDF EXPORTS
+function exportJournalPDF(){
+  const ev=S.event||{};
+  const rows=(S.journal||[]).slice().reverse().map(e=>`<tr><td style="text-align:center">${e.n}</td><td>${e.heure}</td><td>${e.de||''}</td><td>${e.a||''}</td><td>${e.info}</td><td>${e.suivie||''}</td></tr>`).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+    body{font-family:Arial,sans-serif;font-size:11px;padding:15px;margin:0}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;border-bottom:2px solid #003399;padding-bottom:8px}
+    .logo-text{font-size:22px;font-weight:900;color:#003399;letter-spacing:2px}
+    .logo-sub{font-size:9px;color:#666}
+    .title{font-size:16px;font-weight:bold;text-align:center;margin:6px 0;color:#003399}
+    .subtitle{font-size:11px;text-align:center;margin-bottom:6px}
+    table{width:100%;border-collapse:collapse;font-size:10px}
+    th{background:#003399;color:#fff;padding:5px 6px;text-align:left;font-size:10px}
+    td{border:1px solid #ccc;padding:4px 6px;vertical-align:top}
+    tr:nth-child(even) td{background:#f5f5f5}
+    .footer{margin-top:20px;border-top:1px solid #ccc;padding-top:8px;font-size:10px}
+    @page{size:A4 landscape;margin:10mm}
+  </style></head><body>
+    <div class="header"><div><div class="logo-text">A.P.S.</div><div class="logo-sub">Ambulance · Prévention · Secours</div></div><div style="text-align:right;font-size:10px"><div>Préventif : ${ev.name||'...'}</div><div>Lieu : ${ev.lieu||'...'}</div><div>Date : ${ev.date||'...'}</div><div>Généré le : ${nowFull()}</div></div></div>
+    <div class="title">Journal de Campagne</div>
+    <div class="subtitle">Préventif : ${ev.name||'...............................'} — du ${ev.date||'...'} — page 1/1</div>
+    <table><thead><tr><th style="width:30px">N°</th><th style="width:55px">Heure</th><th style="width:50px">De</th><th style="width:50px">À</th><th>Information</th><th style="width:150px">Suivie</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="footer"><div>Nom et signature du rédacteur : ................................................................</div></div>
+  </body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();w.print();
+}
+
+function exportMaterielPDF(){
+  const ev=S.event||{};
+  const counts=S.materiel?.counts||{};
+  let sectionsHtml='';
+  MATERIEL_DATA.forEach(sec=>{
+    sectionsHtml+=`<div class="section-title">${sec.section}</div><table><tbody>`;
+    for(let i=0;i<sec.items.length;i+=2){
+      const a=sec.items[i],b=sec.items[i+1]||'';
+      const ka=a.replace(/[^a-zA-Z0-9]/g,'_'),kb=b.replace(/[^a-zA-Z0-9]/g,'_');
+      const ca=counts[ka]||0,cb=b?counts[kb]||0:'';
+      sectionsHtml+=`<tr><td class="item-name">${a}</td><td class="count">${ca>0?ca:''}</td><td class="item-name">${b}</td><td class="count">${cb>0?cb:''}</td></tr>`;
+    }
+    sectionsHtml+=`</tbody></table>`;
   });
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+    body{font-family:Arial,sans-serif;font-size:10px;padding:15px;margin:0}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+    .logo-text{font-size:20px;font-weight:900;color:#003399;letter-spacing:2px}
+    .logo-sub{font-size:8px;color:#666}
+    .title{font-size:15px;font-weight:bold;text-align:center;margin:6px 0;color:#003399}
+    .section-title{background:#003399;color:#fff;padding:4px 8px;font-weight:bold;font-size:10px;margin-top:6px}
+    table{width:100%;border-collapse:collapse;margin-bottom:2px}
+    td{border:1px solid #bbb;padding:3px 6px;font-size:9px}
+    .item-name{width:35%}
+    .count{width:15%;text-align:center;font-weight:bold;color:#003399}
+    .remarques{margin-top:10px;border-top:1px solid #ccc;padding-top:6px}
+    @page{size:A4;margin:10mm}
+  </style></head><body>
+    <div class="header"><div><div class="logo-text">A.P.S.</div><div class="logo-sub">Ambulance · Prévention · Secours</div></div><div style="text-align:right;font-size:9px"><div>Préventif : ${ev.name||'...'}</div><div>Date : ${ev.date||'...'}</div><div>Responsable : ................................</div></div></div>
+    <div class="title">Matériels utilisés de : ${ev.name||'.................................'}</div>
+    ${sectionsHtml}
+    <div class="remarques"><strong>REMARQUES :</strong><br>${S.materiel?.remarques||''}<br><br>................................................................................................................................................................................................</div>
+  </body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();w.print();
 }
 
-// EXPORT PDF
-function exportPDF(){
-  const evacs=S.interventions.filter(i=>i.pec==='evac').length;
-  const totalPat=S.interventions.reduce((s,i)=>s+i.patients,0);
-  let html=`<html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:12px;padding:20px}h1{font-size:18px;color:#003366}h2{font-size:13px;color:#003366;border-bottom:1px solid #ccc;margin-top:16px}table{width:100%;border-collapse:collapse;margin-top:8px}th{background:#003366;color:#fff;padding:5px 8px;font-size:11px;text-align:left}td{padding:4px 8px;border-bottom:1px solid #eee;font-size:11px}.stat{display:inline-block;margin-right:16px}.stat strong{font-size:16px;display:block}</style></head><body>
-  <h1>🚑 ECHO 112 — Rapport ${S.event.name||''}</h1>
-  <p>Lieu: ${S.event.lieu||'—'} | Date: ${S.event.date||'—'} | Généré: ${nowFull()}</p>
-  ${S.medecin.nom?`<p>Médecin: <strong>${S.medecin.nom}</strong> — ${S.medecin.tel}</p>`:''}
-  <h2>Bilan</h2>
-  <div><div class="stat"><strong>${S.interventions.length}</strong>Interventions</div><div class="stat"><strong>${evacs}</strong>Évacuations</div><div class="stat"><strong>${totalPat}</strong>Patients</div></div>
-  <h2>Interventions</h2>
-  <table><tr><th>Heure</th><th>Équipe</th><th>Type</th><th>Zone</th><th>Patients</th><th>Prise en charge</th></tr>
-  ${S.interventions.map(i=>`<tr><td>${i.time}</td><td>${i.echoName}</td><td>${i.type}</td><td>${i.loc}</td><td>${i.patients}</td><td>${i.pec==='evac'?'ÉVAC → '+(i.hop||''):'Poste soins'}</td></tr>`).join('')}
-  </table>
-  <h2>Main courante</h2>
-  <table><tr><th>Heure</th><th>Événement</th></tr>
-  ${[...S.mainCourante].reverse().map(e=>`<tr><td>${e.time}</td><td>${e.text}</td></tr>`).join('')}
-  </table>
+function exportPresencePDF(){
+  const ev=S.event||{};
+  const rows=(S.actifs||[]).filter(a=>a.present).map(a=>{
+    const p=(S.personnel||[]).find(x=>x.id===a.persId);
+    if(!p)return'';
+    const key='p_'+p.id;const pr=S.presence?.[key]||{};
+    return`<tr><td>${p.nom}</td><td>${p.prenom}</td><td>${FN[p.fn]||p.fn}</td><td style="text-align:center">${pr.debut||''}</td><td style="text-align:center">${pr.fin||''}</td><td style="text-align:center">${calcHeures(pr.debut,pr.fin)}</td><td style="width:80px"></td></tr>`;
+  }).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+    body{font-family:Arial,sans-serif;font-size:11px;padding:15px}
+    .header{display:flex;justify-content:space-between;margin-bottom:10px;border-bottom:2px solid #003399;padding-bottom:8px}
+    .logo-text{font-size:20px;font-weight:900;color:#003399;letter-spacing:2px}
+    .title{font-size:15px;font-weight:bold;text-align:center;margin:8px 0;color:#003399}
+    table{width:100%;border-collapse:collapse}
+    th{background:#003399;color:#fff;padding:5px 8px;text-align:left;font-size:10px}
+    td{border:1px solid #ccc;padding:5px 8px}
+    tr:nth-child(even) td{background:#f5f5f5}
+    @page{size:A4;margin:12mm}
+  </style></head><body>
+    <div class="header"><div><div class="logo-text">A.P.S.</div><div style="font-size:8px;color:#666">Ambulance · Prévention · Secours</div></div><div style="text-align:right;font-size:10px"><div>Préventif : ${ev.name||'...'}</div><div>Date : ${ev.date||'...'} — ${ev.lieu||''}</div></div></div>
+    <div class="title">Feuille de Présence</div>
+    <table><thead><tr><th>Nom</th><th>Prénom</th><th>Fonction</th><th style="text-align:center">Début</th><th style="text-align:center">Fin</th><th style="text-align:center">Heures</th><th>Signature</th></tr></thead><tbody>${rows}</tbody></table>
+  </body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();w.print();
+}
+
+function exportInterPDF(){
+  const ev=S.event||{};
+  const items=S.interventions||[];
+  const rows=items.map(i=>{const labels={poste:'Poste soins','evac-aps':'Évac APS','evac-112':'Évac 112',accomp:'Accompagnée',normal:'Normale'};return`<tr><td>${i.time}</td><td>${i.echoName}</td><td>${i.type}</td><td style="text-align:center">${i.loc}</td><td style="text-align:center">${i.patients}</td><td>${labels[i.pec]||i.pec}${i.hop?' → '+i.hop:''}</td><td>${i.notes||''}</td></tr>`;}).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+    body{font-family:Arial,sans-serif;font-size:10px;padding:15px}
+    .header{display:flex;justify-content:space-between;margin-bottom:8px;border-bottom:2px solid #003399;padding-bottom:6px}
+    .logo-text{font-size:20px;font-weight:900;color:#003399;letter-spacing:2px}
+    .title{font-size:15px;font-weight:bold;text-align:center;margin:6px 0;color:#003399}
+    .stats{display:flex;gap:20px;margin:8px 0;padding:8px;background:#f0f4ff;border:1px solid #cce}
+    .stat{text-align:center}.stat strong{font-size:18px;display:block;color:#003399}
+    table{width:100%;border-collapse:collapse}
+    th{background:#003399;color:#fff;padding:4px 6px;text-align:left;font-size:9px}
+    td{border:1px solid #ccc;padding:3px 6px;font-size:9px}
+    tr:nth-child(even) td{background:#f5f5f5}
+    @page{size:A4 landscape;margin:10mm}
+  </style></head><body>
+    <div class="header"><div><div class="logo-text">A.P.S.</div><div style="font-size:8px;color:#666">Ambulance · Prévention · Secours</div></div><div style="text-align:right;font-size:9px"><div>${ev.name||''} — ${ev.lieu||''} — ${ev.date||''}</div><div>Généré : ${nowFull()}</div></div></div>
+    <div class="title">Bilan des Interventions</div>
+    <div class="stats"><div class="stat"><strong>${items.length}</strong>Totales</div><div class="stat"><strong>${items.filter(i=>i.pec==='poste').length}</strong>Poste soins</div><div class="stat"><strong>${items.filter(i=>i.pec==='evac-aps').length}</strong>Évac APS</div><div class="stat"><strong>${items.filter(i=>i.pec==='evac-112').length}</strong>Évac 112</div><div class="stat"><strong>${items.reduce((s,i)=>s+i.patients,0)}</strong>Patients</div></div>
+    <table><thead><tr><th>Heure</th><th>Équipe</th><th>Type</th><th>Zone</th><th>Patients</th><th>Prise en charge</th><th>Notes</th></tr></thead><tbody>${rows}</tbody></table>
   </body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();w.print();
 }
@@ -856,7 +1394,6 @@ function exportPDF(){
 // BOOT
 window.addEventListener('load',()=>{
   initMap();
-  loadFromFirebase();
   setInterval(()=>{
     const t=new Date().toLocaleTimeString('fr-FR');
     document.getElementById('clock').textContent=t;
@@ -865,36 +1402,6 @@ window.addEventListener('load',()=>{
   },1000);
   setInterval(saveToFirebase,30000);
 });
-
-let mapLocked=false;
-function toggleLock(){
-  mapLocked=!mapLocked;
-  const btn=document.getElementById('btn-lock');
-  if(mapLocked){
-    map.dragging.disable();
-    map.scrollWheelZoom.disable();
-    map.doubleClickZoom.disable();
-    map.touchZoom.disable();
-    btn.textContent='🔒 VERROUILLÉ';
-    btn.style.color='var(--red)';
-    btn.style.borderColor='var(--red)';
-  }else{
-    map.dragging.enable();
-    map.scrollWheelZoom.enable();
-    map.doubleClickZoom.enable();
-    map.touchZoom.enable();
-    btn.textContent='🔓 LIBRE';
-    btn.style.color='';
-    btn.style.borderColor='';
-  }
-}
-
-function printMap(){
-  window.print();
-}
-  
-
-
 </script>
 </body>
 </html>
